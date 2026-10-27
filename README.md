@@ -17,6 +17,8 @@ It has two front ends:
 |----|----|
 | ![The overworld outside Coneria, in 2D](docs/screenshots/overworld-2d.png) | ![The same spot in the 3D view](docs/screenshots/overworld-3d.png) |
 | ![Chaos in the Temple of Fiends, in 2D](docs/screenshots/chaos-2d.png) | ![The same battle as a 3D diorama](docs/screenshots/chaos-3d.png) |
+| ![Knight, Ninja, Master and Red Wizard against Kary in Gurgu Volcano, in 2D](docs/screenshots/kary-2d.png) | ![The same battle in 3D](docs/screenshots/kary-3d.png) |
+| ![White Wizard, Black Wizard, Knight and Ninja against Tiamat, in 2D](docs/screenshots/tiamat-2d.png) | ![The same battle in 3D](docs/screenshots/tiamat-3d.png) |
 
 > **No game data is included.** This repository contains code (and the
 > screenshots above) only. To build and play it you need your own copy of
