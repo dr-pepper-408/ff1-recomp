@@ -1,0 +1,384 @@
+/*
+ * constants.h - FF1 game constants
+ * Source: Constants.inc
+ * Generated: 2026-10-27
+ */
+
+#pragma once
+
+// directions for facing and keys
+#define RIGHT 0x01
+#define LEFT 0x02
+#define DOWN 0x04
+#define UP 0x08
+#define BTN_START 0x10
+// music channels
+#define CHAN_START 0xB0
+#define CHAN_BYTES 0x10
+#define CHAN_SQ1 0xB0
+#define CHAN_SQ2 0xC0
+#define CHAN_TRI 0xD0
+#define CHAN_STOP 0xE0
+// enemy categories
+#define CATEGORY_UNKNOWN 0x01
+#define CATEGORY_DRAGON 0x02
+#define CATEGORY_GIANT 0x04
+#define CATEGORY_UNDEAD 0x08
+#define CATEGORY_WERE 0x10
+#define CATEGORY_WATER 0x20
+#define CATEGORY_MAGE 0x40
+#define CATEGORY_REGEN 0x80
+// enemy stats in ROM
+#define ENROMSTAT_EXP 0x00
+#define ENROMSTAT_GP 0x02
+#define ENROMSTAT_HPMAX 0x04
+#define ENROMSTAT_MORALE 0x06
+#define ENROMSTAT_AI 0x07
+#define ENROMSTAT_EVADE 0x08
+#define ENROMSTAT_ABSORB 0x09
+#define ENROMSTAT_NUMHITS 0x0A
+#define ENROMSTAT_HITRATE 0x0B
+#define ENROMSTAT_DAMAGE 0x0C
+#define ENROMSTAT_CRITRATE 0x0D
+#define ENROMSTAT_UNKNOWN_E 0x0E
+#define ENROMSTAT_ATTACKAIL 0x0F
+#define ENROMSTAT_CATEGORY 0x10
+#define ENROMSTAT_MAGDEF 0x11
+#define ENROMSTAT_ELEMWEAK 0x12
+#define ENROMSTAT_ELEMRESIST 0x13
+// magic data in ROM
+#define MAGDATA_HITRATE 0x00
+#define MAGDATA_EFFECTIVITY 0x01
+#define MAGDATA_ELEMENT 0x02
+#define MAGDATA_TARGET 0x03
+#define MAGDATA_EFFECT 0x04
+#define MAGDATA_GRAPHIC 0x05
+#define MAGDATA_PALETTE 0x06
+#define MAGDATA_UNUSED 0x07
+// 
+#define BANK_TALKTOOBJ 0x0E
+#define BANK_MENUS 0x0E
+#define BANK_TITLE 0x0E
+#define BANK_INTRO 0x0E
+#define BANK_PARTYGEN 0x0E
+#define BANK_MUSIC 0x0D
+#define BANK_EQUIPSTATS 0x0C
+#define BANK_BTLPALETTES 0x0C
+#define BANK_BATTLE 0x0B
+#define BANK_BTLDATA 0x0B
+#define BANK_DOMAINS 0x0B
+#define BANK_ENEMYNAMES 0x0B
+#define BANK_BTLMESSAGES 0x0B
+#define BANK_MINIMAP 0x09
+#define BANK_MENUCHR 0x09
+#define BANK_BATTLECHR 0x07
+#define BANK_STANDARDMAPS 0x04
+#define BANK_TILESETCHR 0x03
+#define BANK_MAPCHR 0x02
+#define BANK_OWMAP 0x01
+#define BANK_OBJINFO 0x00
+#define BANK_MAPMANPAL 0x00
+#define BANK_OWINFO 0x00
+#define BANK_SMINFO 0x00
+#define BANK_TREASURE 0x00
+#define BANK_TELEPORTINFO 0x00
+#define BANK_STARTUPINFO 0x00
+#define BANK_STARTINGSTATS 0x00
+#define BANK_ORBCHR 0x0D
+#define BANK_BTLCHR 0x09
+#define BANK_BACKDROPPAL 0x00
+#define BANK_ITEMPRICES 0x0D
+#define BANK_MINIGAME 0x0D
+#define BANK_BRIDGESCENE 0x0D
+#define BANK_ENDINGSCENE 0x0D
+#define BANK_INTROTEXT 0x0D
+#define BANK_BRIDGEGFX 0x0B
+#define BANK_EPILOGUEGFX 0x0B
+#define BANK_DIALOGUE 0x0A
+#define BANK_ITEMS 0x0A
+#define MAPTILE_CLOSEDDOOR 0x36
+#define MAPTILE_OPENDOOR 0x37
+#define MAPTILE_LOCKEDDOOR 0x3B
+// game flag bits
+#define GMFLG_OBJVISIBLE 0x01
+#define GMFLG_EVENT 0x02
+#define GMFLG_TCOPEN 0x04
+// battle formation IDs
+#define BTL_VAMPIRE 0x7C
+#define BTL_ASTOS 0x7D
+#define BTL_BIKKE 0x7E
+#define BTL_GARLAND 0x7F
+// battle message IDs  (1-based)
+#define BTLMSG_HPUP 0x01
+#define BTLMSG_ASLEEP 0x04
+#define BTLMSG_SIGHTRECOVERED 0x06
+#define BTLMSG_SILENCED 0x07
+#define BTLMSG_DARKNESS 0x09
+#define BTLMSG_NEUTRALIZED 0x0E
+#define BTLMSG_BREAKSILENCE 0x11
+#define BTLMSG_CONFUSED 0x13
+#define BTLMSG_POISONED 0x14
+#define BTLMSG_PARALYZED_A 0x17
+#define BTLMSG_BROKENTOPIECES 0x1A
+#define BTLMSG_SLAIN 0x20
+#define BTLMSG_INEFFECTIVE 0x21
+#define BTLMSG_STRIKEFIRST 0x22
+#define BTLMSG_SURPRISED 0x23
+#define BTLMSG_CANTRUN 0x24
+#define BTLMSG_RUNAWAY 0x25
+#define BTLMSG_CLOSECALL 0x26
+#define BTLMSG_WOKEUP 0x27
+#define BTLMSG_SLEEPING 0x28
+#define BTLMSG_CURED 0x29
+#define BTLMSG_PARALYZED_B 0x2A
+#define BTLMSG_HITS 0x2B
+#define BTLMSG_CRITICALHIT 0x2C
+#define BTLMSG_DMG 0x2E
+#define BTLMSG_STOPPED 0x2F
+#define BTLMSG_STR 0x33
+#define BTLMSG_AGI 0x34
+#define BTLMSG_INT 0x35
+#define BTLMSG_VIT 0x36
+#define BTLMSG_LUCK 0x37
+#define BTLMSG_UP 0x38
+#define BTLMSG_TERMINATED 0x3F
+#define BTLMSG_MISSED 0x40
+#define BTLMSG_INEFFECTIVENOW 0x4A
+#define BTLMSG_NOTHINGHAPPENS 0x4E
+// See that routine for more info.
+#define ALTBTLMSG_RUNAWAY 0x00
+#define ALTBTLMSG_PARALYZED_B 0x01
+#define ALTBTLMSG_SLEEPING 0x02
+#define ALTBTLMSG_SILENCED_1 0x03
+#define ALTBTLMSG_INEFFECTIVE 0x04
+#define ALTBTLMSG_CONFUSED 0x05
+#define ALTBTLMSG_SILENCED_2 0x06
+#define ALTBTLMSG_ASLEEP 0x07
+#define ALTBTLMSG_PARALYZED_A 0x08
+#define ALTBTLMSG_DARKNESS 0x09
+#define ALTBTLMSG_POISONED 0x0A
+#define ALTBTLMSG_BROKENTOPIECES 0x0B
+#define ALTBTLMSG_TERMINATED 0x0C
+#define ALTBTLMSG_CURED_1 0x0D
+#define ALTBTLMSG_BREAKSILENCE 0x0E
+#define ALTBTLMSG_WOKEUP 0x0F
+#define ALTBTLMSG_CURED_2 0x10
+#define ALTBTLMSG_SIGHTRECOVERED 0x11
+#define ALTBTLMSG_NEUTRALIZED 0x12
+#define ALTBTLMSG_INEFFECTIVENOW 0x13
+#define ALTBTLMSG_SLAIN 0x14
+#define ALTBTLMSG_NOTHINGHAPPENS 0x15
+// normal teleport IDs
+#define NORMTELE_SAVEDPRINCESS 0x3F
+// misc crap
+#define WPNID_XCALBUR 0x27
+// ailments
+#define AIL_DEAD 0x01
+#define AIL_STONE 0x02
+#define AIL_POISON 0x04
+#define AIL_DARK 0x08
+#define AIL_STUN 0x10
+#define AIL_SLEEP 0x20
+#define AIL_MUTE 0x40
+#define AIL_CONF 0x80
+// 
+#define OBJID_GARLAND 0x02
+#define OBJID_PRINCESS_1 0x03
+#define OBJID_BIKKE 0x04
+#define OBJID_ELFPRINCE 0x06
+#define OBJID_ASTOS 0x07
+#define OBJID_NERRICK 0x08
+#define OBJID_SMITH 0x09
+#define OBJID_MATOYA 0x0A
+#define OBJID_UNNE 0x0B
+#define OBJID_VAMPIRE 0x0C
+#define OBJID_SARDA 0x0D
+#define OBJID_BAHAMUT 0x0E
+#define OBJID_SUBENGINEER 0x10
+#define OBJID_PRINCESS_2 0x12
+#define OBJID_FAIRY 0x13
+#define OBJID_TITAN 0x14
+#define OBJID_RODPLATE 0x16
+#define OBJID_LUTEPLATE 0x17
+#define OBJID_SKYWAR_FIRST 0x3A
+#define OBJID_SKYWAR_LAST 0x3E
+#define OBJID_PIRATETERR_1 0x3F
+#define OBJID_PIRATETERR_2 0x40
+#define OBJID_PIRATETERR_3 0x41
+#define OBJID_BAT 0x57
+#define OBJID_BLACKORB 0xCA
+#define DLGID_NOTHING 0x00
+#define DLGID_DONTBEGREEDY 0x3A
+#define DLGID_TCGET 0xF0
+#define DLGID_CANTCARRY 0xF1
+#define DLGID_EMPTYTC 0xF2
+// treasure item type ranges
+#define TCITYPE_ITEMSTART 0x00
+#define TCITYPE_WEPSTART 0x1C
+#define TCITYPE_ARMSTART 0x44
+#define TCITYPE_GPSTART 0x6C
+// standard map tile properties
+#define TP_SPEC_DOOR 0x02
+#define TP_SPEC_LOCKED 0x04
+#define TP_SPEC_CLOSEROOM 0x06
+#define TP_SPEC_TREASURE 0x08
+#define TP_SPEC_BATTLE 0x0A
+#define TP_SPEC_DAMAGE 0x0C
+#define TP_SPEC_CROWN 0x0E
+#define TP_SPEC_CUBE 0x10
+#define TP_SPEC_4ORBS 0x12
+#define TP_SPEC_USEROD 0x14
+#define TP_SPEC_USELUTE 0x16
+#define TP_SPEC_EARTHORB 0x18
+#define TP_SPEC_FIREORB 0x1A
+#define TP_SPEC_WATERORB 0x1C
+#define TP_SPEC_AIRORB 0x1E
+#define TP_SPEC_MASK 0x1E
+#define TP_TELE_EXIT 0xC0
+#define TP_TELE_NORM 0x80
+#define TP_TELE_WARP 0x40
+#define TP_TELE_NONE 0x00
+#define TP_TELE_MASK 0xC0
+#define TP_NOTEXT_MASK 0xC2
+#define TP_BATTLEMARKER 0x20
+#define TP_NOMOVE 0x01
+// overworld map tile properties
+#define OWTP_DOCKSHIP 0x20
+#define OWTP_FOREST 0x10
+#define OWTP_SPEC_CHIME 0x40
+#define OWTP_SPEC_CARAVAN 0x80
+#define OWTP_SPEC_FLOATER 0xC0
+#define OWTP_SPEC_MASK 0xC0
+// "Poses" for the characters in battle
+#define CHARPOSE_STAND 0x00
+#define CHARPOSE_WALK 0x04
+#define CHARPOSE_ATTACK_B 0x08
+#define CHARPOSE_ATTACK_F 0x0C
+#define CHARPOSE_CHEER 0x10
+#define CHARPOSE_CHEER_2 0x14
+#define CHARPOSE_CROUCH 0x18
+#define CHARPOSE_CROUCH_2 0x1C
+// labels that couldn't be inserted in data
+#define lut_MapObjects_ADDR 0xB400
+#define lut_MapObjGfx_ADDR 0xAE00
+#define lut_MapObjCHR_ADDR 0xA200
+#define lut_MapmanPalettes_ADDR 0x83A0
+#define lut_OWPtrTbl_ADDR 0x8000
+#define lut_SMPtrTbl_ADDR 0x8000
+#define lut_EnemyAttack_ADDR 0xB600
+#define lut_ItemNamePtrTbl_ADDR 0xB700
+#define lut_Domains_ADDR 0x8000
+#define lut_ShopCHR_ADDR 0x8000
+#define lut_BtlBackdrops_ADDR 0xB300
+#define lut_OrbCHR_ADDR 0xB600
+#define lut_BatSprCHR_ADDR 0x9000
+#define lut_BatObjCHR_ADDR 0xA800
+#define lut_BackdropPal_ADDR 0xB200
+#define lut_ItemPrices_ADDR 0xBC00
+#define lut_Weapons_ADDR 0x8000
+#define lut_Armor_ADDR 0x8140
+#define lut_OWTileset_ADDR 0x8000
+#define lut_DialoguePtrTbl_ADDR 0x8000
+#define lut_SMTilesetAttr_ADDR 0x8400
+#define lut_SMTilesetProp_ADDR 0x8800
+#define lut_SMTilesetTSA_ADDR 0x9000
+#define lut_SMPalettes_ADDR 0xA000
+#define lut_Treasure_ADDR 0xB100
+#define lut_Tilesets_ADDR 0xACC0
+#define lut_NormTele_X_ADDR 0xAD00
+#define lut_NormTele_Y_ADDR 0xAD40
+#define lut_NormTele_Map_ADDR 0xAD80
+#define lut_ExitTele_X_ADDR 0xAC60
+#define lut_ExitTele_Y_ADDR 0xAC70
+#define lut_EntrTele_X_ADDR 0xAC00
+#define lut_EntrTele_Y_ADDR 0xAC20
+#define lut_EntrTele_Map_ADDR 0xAC40
+#define lut_InitGameFlags_ADDR 0xAF00
+#define lut_InitUnsramFirstPage_ADDR 0xB000
+#define lut_ClassStartingStats_ADDR 0xB040
+
+// Character Classes
+typedef enum {
+    CLASS_FT = 0x00,
+    CLASS_TH = 0x01,
+    CLASS_BB = 0x02,
+    CLASS_RM = 0x03,
+    CLASS_WM = 0x04,
+    CLASS_BM = 0x05,
+    CLASS_KN = 0x06,
+    CLASS_NJ = 0x07,
+    CLASS_MA = 0x08,
+    CLASS_RW = 0x09,
+    CLASS_WW = 0x0A,
+    CLASS_BW = 0x0B,
+} CharacterClass;
+
+// Spell IDs
+typedef enum {
+    SPELL_START = 0xB0,
+    SPELL_CURE = 0xB0,
+    SPELL_HARM = 0xB1,
+    SPELL_FOG = 0xB2,
+    SPELL_RUSE = 0xB3,
+    SPELL_FIRE = 0xB4,
+    SPELL_SLEP = 0xB5,
+    SPELL_LOCK = 0xB6,
+    SPELL_LIT = 0xB7,
+    SPELL_LAMP = 0xB8,
+    SPELL_MUTE = 0xB9,
+    SPELL_ALIT = 0xBA,
+    SPELL_INVS = 0xBB,
+    SPELL_ICE = 0xBC,
+    SPELL_DARK = 0xBD,
+    SPELL_TMPR = 0xBE,
+    SPELL_SLOW = 0xBF,
+    SPELL_CUR2 = 0xC0,
+    SPELL_HRM2 = 0xC1,
+    SPELL_AFIR = 0xC2,
+    SPELL_HEAL = 0xC3,
+    SPELL_FIR2 = 0xC4,
+    SPELL_HOLD = 0xC5,
+    SPELL_LIT2 = 0xC6,
+    SPELL_LOK2 = 0xC7,
+    SPELL_PURE = 0xC8,
+    SPELL_FEAR = 0xC9,
+    SPELL_AICE = 0xCA,
+    SPELL_AMUT = 0xCB,
+    SPELL_SLP2 = 0xCC,
+    SPELL_FAST = 0xCD,
+    SPELL_CONF = 0xCE,
+    SPELL_ICE2 = 0xCF,
+    SPELL_CUR3 = 0xD0,
+    SPELL_LIFE = 0xD1,
+    SPELL_HRM3 = 0xD2,
+    SPELL_HEL2 = 0xD3,
+    SPELL_FIR3 = 0xD4,
+    SPELL_BANE = 0xD5,
+    SPELL_WARP = 0xD6,
+    SPELL_SLO2 = 0xD7,
+    SPELL_SOFT = 0xD8,
+    SPELL_EXIT = 0xD9,
+    SPELL_FOG2 = 0xDA,
+    SPELL_INV2 = 0xDB,
+    SPELL_LIT3 = 0xDC,
+    SPELL_RUB = 0xDD,
+    SPELL_QAKE = 0xDE,
+    SPELL_STUN = 0xDF,
+    SPELL_CUR4 = 0xE0,
+    SPELL_HRM4 = 0xE1,
+    SPELL_ARUB = 0xE2,
+    SPELL_HEL3 = 0xE3,
+    SPELL_ICE3 = 0xE4,
+    SPELL_BRAK = 0xE5,
+    SPELL_SABR = 0xE6,
+    SPELL_BLND = 0xE7,
+    SPELL_LIF2 = 0xE8,
+    SPELL_FADE = 0xE9,
+    SPELL_WALL = 0xEA,
+    SPELL_XFER = 0xEB,
+    SPELL_NUKE = 0xEC,
+    SPELL_STOP = 0xED,
+    SPELL_ZAP = 0xEE,
+    SPELL_XXXX = 0xEF,
+} SpellID;
+

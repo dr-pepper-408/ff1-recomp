@@ -1,0 +1,16 @@
+# Build output
+build/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS / editor cruft
+Thumbs.db
+.DS_Store
+
+# The game's data, generated from the ROM (tools/extract_data.py): never committed
+data/generated/data/
+# Dumps of the game's graphics and map (tools/extract_chr.py, extract_overworld_rle.py): never committed
+data/graphics/
+data/overworld_rle.bin
