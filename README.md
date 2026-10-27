@@ -13,9 +13,14 @@ It has two front ends:
   2D cutouts, a battle diorama, camera presets and a few extras (tilt-shift,
   day and night). F2 switches between 2D and 3D.
 
-> **No game data is included.** This repository contains code only. To
-> build and play it you need your own copy of *Final Fantasy* (USA) for the
-> NES, as a ROM file. Nothing from the game is committed: the data is
+| 2D | 3D |
+|----|----|
+| ![The overworld outside Coneria, in 2D](docs/screenshots/overworld-2d.png) | ![The same spot in the 3D view](docs/screenshots/overworld-3d.png) |
+| ![Chaos in the Temple of Fiends, in 2D](docs/screenshots/chaos-2d.png) | ![The same battle as a 3D diorama](docs/screenshots/chaos-3d.png) |
+
+> **No game data is included.** This repository contains code (and the
+> screenshots above) only. To build and play it you need your own copy of
+> *Final Fantasy* (USA) for the NES, as a ROM file. The game's data is
 > read from your ROM when the game starts.
 
 ## Status

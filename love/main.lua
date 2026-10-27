@@ -24,6 +24,7 @@
   --enter=N (go through overworld entrance N: 1 Coneria, 2 Pravoka...),
   --inroom (with --enter: as if through a door, the rooms' insides shown),
   --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
+  --nohud (no status lines at the top, for pictures),
   --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
   FILE were dropped on the ROM prompt), --landmark-refs (write
   reference pictures of the overworld's landmarks to the save folder's
@@ -130,6 +131,7 @@ local force_battlecam                      -- --battlecam=N
 local battle_t0 = 0                        -- when this battle's shot began (its camera move)
 local start_battle                         -- --battle=N
 local battle_wait                          -- (frames before it, after --enter)
+local no_hud                               -- --nohud: no status lines (for pictures)
 local enter_id                             -- --enter=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
@@ -444,6 +446,7 @@ function love.load(args)
         if a == "--auto" then auto_a = 0 end
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then view3d = false end
+        if a == "--nohud" then no_hud = true end
         if a == "--ask-rom" then ask_rom = true end
         local dp = a:match("^%-%-drop=(.+)$")              -- (as if this file were dropped)
         if dp then ask_rom, drop_path = true, dp end
@@ -1120,6 +1123,7 @@ function love.draw()
             end)
         end
     end
+    if no_hud then return end
     love.graphics.print(string.format("%s  %s camera, %s view  %d fps  (F2 2D/3D, C camera, V view, Q/E turn, PgUp/PgDn zoom)",
         view3d and "3D" or "2D", PRESETS[preset_i].name, VIEWS[view_i][1], love.timer.getFPS()), 8, 8)
     love.graphics.print(string.format("extras: F5 tilt-shift %s, F6 water %s, F7 day/night %s, F8 battle camera move %s, F9 encounters %s, F10 battle speed %dx",
