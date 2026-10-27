@@ -61,6 +61,7 @@ int ff1_battle3d(void);
 int ff1_battle_scene(Ff1Vertex* out, int max, uint8_t* atlas, float rx, float rz, float* info);
 void ff1_battle_overlay(uint8_t* rgba);
 void ff1_battle_stagger(float s);
+void ff1_battle_flip(int on);
 void ff1_debug_battle(int formation);
 void ff1_debug_enter(int id);
 void ff1_debug_inroom(void);
@@ -1111,6 +1112,13 @@ function love.draw()
             local w, h = love.graphics.getDimensions()
             battle_cam = frame_battle(shot, battle_info, stagger, w / h)
             battle_t0 = love.timer.getTime()
+            -- Seen from this shot, are the enemies to the party's right?
+            -- Then the cutouts are mirrored, so the two sides face each
+            -- other.  (The camera's right is (cos a, -sin a) on the stage.)
+            local a = math.rad(shot.a)
+            local da = (battle_info[6] + battle_info[7]) / 2 - (PARTY_ACROSS0 + 1.5 * PARTY_ROW)
+            local dz = (battle_info[8] + battle_info[9]) / 2 - PARTY_Z
+            core.ff1_battle_flip(math.cos(a) * da - math.sin(a) * dz > 0 and 1 or 0)
         end
         draw_battle3d()
     else draw2d() end

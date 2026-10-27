@@ -1169,8 +1169,14 @@ FF1_API int ff1_sprites(Ff1Vertex* out, int max, uint8_t* atlas, float yaw) {
 #define BA_BACK_Y 480           /* ...the backdrop's copy at (0, 480) */
 #define BA_PAD 2                /* air round each cutout, for its outline */
 static float ba_stagger;        /* each party row this much further back (ff1_battle_stagger) */
+static int ba_flip;             /* the cutouts mirrored (ff1_battle_flip) */
 
 FF1_API void ff1_battle_stagger(float s) { ba_stagger = s; }
+
+/* Seen from the camera, the enemies stand to the right of the party: the
+ * cutouts are mirrored, so the party (facing left on the NES screen) and
+ * the enemies (facing right) still face each other. */
+FF1_API void ff1_battle_flip(int on) { ba_flip = on; }
 #define UI_X 200                /* the menus and status: x >= 200 or y >= 144 */
 #define UI_Y 144
 
@@ -1193,6 +1199,7 @@ static void ba_stand(Emit* e, float lx, float z, float w, float y0, float y1, fl
     const float p[4][3] = { { lx - hx, y1, z - hz }, { lx + hx, y1, z + hz },
                             { lx + hx, y0, z + hz }, { lx - hx, y0, z - hz } };
     const float k = (float)FF1_ATLAS_W / BA_W, kv = (float)FF1_ATLAS_H / BA_W;   /* (emit_quad's units) */
+    if (ba_flip) { float t = u0; u0 = u1; u1 = t; }
     const float uv[4][2] = { { u0 * k, v0 * kv }, { u1 * k, v0 * kv }, { u1 * k, v1 * kv }, { u0 * k, v1 * kv } };
     emit_quad(e, p, uv, 255);
 }
@@ -1336,13 +1343,13 @@ FF1_API int ff1_battle_scene(Ff1Vertex* out, int max, uint8_t* atlas, float rx, 
         float across, z, foot;
         if (en >= 0) {                                 /* just in front of that enemy */
             float ecx = (float)(v.enemy[en].x + v.enemy[en].w / 2);
-            float off = cx - ecx;
+            float off = (cx - ecx) * (ba_flip ? -1 : 1);
             z = ecx + 2 + off * rz;
             across = (float)(v.enemy[en].y + v.enemy[en].h / 2) + off * rx;
             foot = (float)(v.enemy[en].y + v.enemy[en].h);
         } else if (b >= 0 && b < 4 && cy >= v.party_y) {   /* with its row's character */
             float rzc = row_has[b] ? row_z[b] : cx;
-            float off = g[i].party ? 0 : cx - rzc;
+            float off = g[i].party ? 0 : (cx - rzc) * (ba_flip ? -1 : 1);
             z = rzc + off * rz + (g[i].party ? 0 : 1);     /* (a weapon a hair in front) */
             across = (float)(v.party_y + b * v.party_row + v.party_row / 2) + off * rx;
             foot = (float)(v.party_y + b * v.party_row + 24);

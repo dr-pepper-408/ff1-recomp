@@ -123,6 +123,10 @@ FF1_API int ff1_battle_scene(Ff1Vertex* out, int max, uint8_t* atlas, float rx, 
  *  as seen from the camera's side. */
 FF1_API void ff1_battle_stagger(float s);
 
+/** Mirror the battle's cutouts (when the camera sees the enemies to the
+ *  party's right), so the party and the enemies face each other. */
+FF1_API void ff1_battle_flip(int on);
+
 /** Clear the stage area of a picture from ff1_draw, leaving the menus and
  *  the status column to draw over the diorama. */
 FF1_API void ff1_battle_overlay(uint8_t* rgba);
