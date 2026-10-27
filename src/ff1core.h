@@ -145,6 +145,9 @@ FF1_API void ff1_debug_inroom(void);
 /** For screenshots and testing: show dialogue `id`, as talking does. */
 FF1_API void ff1_debug_dialogue(int id);
 
+/** For screenshots and testing: character `i`'s class (6-11: promoted). */
+FF1_API void ff1_debug_class(int i, int cls);
+
 /** Random encounters on (as the original) or off; fixed battles still happen. */
 FF1_API void ff1_set_encounters(int on);
 

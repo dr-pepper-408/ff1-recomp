@@ -25,6 +25,7 @@
   --inroom (with --enter: as if through a door, the rooms' insides shown),
   --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
   --nohud (no status lines at the top, for pictures),
+  --classes=A,B,C,D (the party's classes: 0-5, 6-11 after the class change),
   --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
   FILE were dropped on the ROM prompt), --landmark-refs (write
   reference pictures of the overworld's landmarks to the save folder's
@@ -64,6 +65,7 @@ void ff1_debug_battle(int formation);
 void ff1_debug_enter(int id);
 void ff1_debug_inroom(void);
 void ff1_debug_dialogue(int id);
+void ff1_debug_class(int i, int cls);
 int ff1_landmark_count(void);
 void ff1_landmark_info(int i, int* out);
 void ff1_landmark_pixels(int i, uint8_t* rgba);
@@ -132,6 +134,7 @@ local battle_t0 = 0                        -- when this battle's shot began (its
 local start_battle                         -- --battle=N
 local battle_wait                          -- (frames before it, after --enter)
 local no_hud                               -- --nohud: no status lines (for pictures)
+local set_classes                          -- --classes=A,B,C,D
 local enter_id                             -- --enter=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
@@ -447,6 +450,8 @@ function love.load(args)
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then view3d = false end
         if a == "--nohud" then no_hud = true end
+        local cl = a:match("^%-%-classes=([%d,]+)$")
+        if cl then set_classes = {}; for c in cl:gmatch("%d+") do set_classes[#set_classes + 1] = tonumber(c) end end
         if a == "--ask-rom" then ask_rom = true end
         local dp = a:match("^%-%-drop=(.+)$")              -- (as if this file were dropped)
         if dp then ask_rom, drop_path = true, dp end
@@ -577,6 +582,10 @@ function love.update(dt)
         for _ = 1, extra do core.ff1_frame(b) end
         core.ff1_frame(b)
         if place then core.ff1_debug_place(place[1], place[2], place[3] or 0); place = nil end
+        if set_classes then
+            for i, c in ipairs(set_classes) do core.ff1_debug_class(i - 1, c) end
+            set_classes = nil
+        end
         if start_battle then                       -- (with --enter: once the party is in)
             battle_wait = (battle_wait or (enter_id and 120 or 0)) - 1
             if battle_wait < 0 then core.ff1_debug_battle(start_battle); start_battle = nil end

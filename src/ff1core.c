@@ -1432,6 +1432,13 @@ FF1_API void ff1_debug_dialogue(int id) {
     g_ctx.state = GS_DIALOGUE;
 }
 
+/* For screenshots and testing: character `i`'s class (0-5, or 6-11 after
+ * the class change, as DoClassChange's +6). */
+FF1_API void ff1_debug_class(int i, int cls) {
+    if (i >= 0 && i < MAX_PARTY_SIZE && cls >= 0 && cls < 12)
+        g_ctx.save.characters[i].class = (uint8_t)cls;
+}
+
 /* Random encounters on or off (an option, not in the original). */
 FF1_API void ff1_set_encounters(int on) {
     Game_SetRandomEncounters(on);
