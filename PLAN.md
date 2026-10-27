@@ -1,4 +1,4 @@
-# FF1-x86 — Full Port Plan
+# FF1-recomp — Full Port Plan
 
 Goal: a complete, playable C99 port of *Final Fantasy* (NES), from title screen
 to "The End", reimplemented from a disassembly of the original.

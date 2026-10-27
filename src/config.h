@@ -4,7 +4,7 @@
 // ---- Compile-time defaults ----
 #define DEFAULT_SCALE          3
 #define DEFAULT_FULLSCREEN     0
-#define WINDOW_TITLE           "FF1-x86"
+#define WINDOW_TITLE           "FF1-recomp"
 
 // ---- Debug party (set to 1 to seed a level-10 party with items, equipment,
 //      magic and gold on new game, for exercising the menus; 0 for the normal

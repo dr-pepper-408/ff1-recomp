@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(ff1-x86 C)
+project(ff1-recomp C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -66,13 +66,13 @@ include_directories(
 link_directories(${SDL3_LIB_DIR})
 
 # Executable
-add_executable(ff1-x86 ${SOURCES})
+add_executable(ff1-recomp ${SOURCES})
 
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-    target_compile_options(ff1-x86 PRIVATE -Wall -Wextra)
+    target_compile_options(ff1-recomp PRIVATE -Wall -Wextra)
 endif()
 
-target_link_libraries(ff1-x86
+target_link_libraries(ff1-recomp
     libSDL3.dll.a
     -static-libgcc
 )
@@ -89,10 +89,10 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Copy SDL3.dll to output directory
-add_custom_command(TARGET ff1-x86 POST_BUILD
+add_custom_command(TARGET ff1-recomp POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     "${SDL3_DLL}"
-    "$<TARGET_FILE_DIR:ff1-x86>"
+    "$<TARGET_FILE_DIR:ff1-recomp>"
     COMMENT "Copying SDL3.dll..."
 )
 
@@ -159,7 +159,7 @@ if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 endif()
 
 # Set the working directory for the executable to the project root
-set_property(TARGET ff1-x86 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+set_property(TARGET ff1-recomp PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
 # The game's tables as text, to check src/romdata.c against the extractor:
 #   ff1-dump-ref <out>  /  ff1-dump-rom <rom> <out>  -- the files must match.
 if(ROM_DATA_SOURCES)

@@ -1,5 +1,5 @@
 function love.conf(t)
-    t.identity = "ff1-x86"
+    t.identity = "ff1-recomp"
     t.version = "11.5"
     t.console = true
     t.window.title = "Final Fantasy (LOVE)"

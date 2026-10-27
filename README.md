@@ -1,4 +1,4 @@
-# FF1-x86
+# FF1-recomp
 
 A native port of *Final Fantasy* (NES, 1990) to C99, written routine by
 routine from a disassembly of the original game rather than by emulating
@@ -7,7 +7,7 @@ the 6502. The game logic follows the original's, including its bugs (marked
 
 It has two front ends:
 
-- **SDL3** (`ff1-x86`): the game as the NES showed it, pixel for pixel.
+- **SDL3** (`ff1-recomp`): the game as the NES showed it, pixel for pixel.
 - **LÖVE** (`love/`): the same game, with an optional 3D view in the style
   of HD-2D games: a voxel overworld, towns and dungeons in 3D, characters as
   2D cutouts, a battle diorama, camera presets and a few extras (tilt-shift,
@@ -59,11 +59,11 @@ build/ff1-screenshots <dir>        # scripted scenes, PASS/FAIL, PPM screenshots
 ## Release
 
 ```sh
-python tools/make_release.py       # release/FF1-x86/ and release/FF1-x86-windows.zip
+python tools/make_release.py       # release/FF1-recomp/ and release/FF1-recomp-windows.zip
 ```
 
 A ready-to-play Windows folder of the LÖVE version (LÖVE fused in, its
-runtime, `ff1core.dll`), with no game data: players run `FF1-x86.exe` and
+runtime, `ff1core.dll`), with no game data: players run `FF1-recomp.exe` and
 drop their ROM on the window the first time.
 
 ## Run
@@ -72,7 +72,7 @@ drop their ROM on the window the first time.
   The first time, it asks for the ROM: drag the file onto the window. It is
   checked and kept in LÖVE's save folder, so it's asked for only once.
   `--new` skips the title screen.
-- SDL3: `build/ff1-x86 --rom <file>`, or put the ROM beside the program as
+- SDL3: `build/ff1-recomp --rom <file>`, or put the ROM beside the program as
   `FinalFantasy.nes` (`FF1_ROM` works too). `--new` skips the title screen.
 
 | Key | Action |

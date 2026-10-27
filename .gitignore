@@ -21,3 +21,6 @@ data/overworld_rle.bin
 
 # Release builds (tools/make_release.py)
 release/
+
+# Screenshot scenarios' output (build/ff1-screenshots shots)
+shots/

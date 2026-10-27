@@ -3,9 +3,9 @@ make_release.py -- a ready-to-play folder of the LÖVE version, for Windows.
 
     python tools/make_release.py [--love "C:/Program Files/LOVE"]
 
-Builds release/FF1-x86/ (and release/FF1-x86-windows.zip):
+Builds release/FF1-recomp/ (and release/FF1-recomp-windows.zip):
 
-    FF1-x86.exe      LÖVE with the game fused in (love/ as game.love)
+    FF1-recomp.exe   LÖVE with the game fused in (love/ as game.love)
     *.dll            LÖVE's runtime, and ff1core.dll (the game, from build/)
     LOVE-license.txt LÖVE's licence (zlib), which allows this
     README.txt       for players: what they need, how to start
@@ -22,15 +22,15 @@ import zipfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 PORT = os.path.dirname(HERE)
 
-PLAYER_README = """FF1-x86 -- Final Fantasy (NES), ported to the PC, with an optional 3D view
-=====================================================================
+PLAYER_README = """FF1-recomp -- Final Fantasy (NES), ported to the PC, with an optional 3D view
+=============================================================================
 
 This is an unofficial fan project. It contains no data from the game:
 you need your own copy of Final Fantasy (USA) for the NES, as a ROM file.
 
 Starting
 --------
-Run FF1-x86.exe. The first time, it asks for the ROM: drag the file onto
+Run FF1-recomp.exe. The first time, it asks for the ROM: drag the file onto
 the window. It must be Final Fantasy (USA), the original 1990 NES release,
 unmodified (other versions, translations and hacks don't work). It is
 checked and kept in the game's save folder, so you're asked only once.
@@ -67,12 +67,12 @@ def main():
     if not os.path.exists(love_exe):
         raise SystemExit(f"{love_exe} missing: install LÖVE 11.5 or pass --love")
 
-    out = os.path.join(PORT, "release", "FF1-x86")
+    out = os.path.join(PORT, "release", "FF1-recomp")
     try:
         if os.path.exists(out):
             shutil.rmtree(out)
     except OSError as e:
-        raise SystemExit(f"can't replace {out} ({e.strerror}): close FF1-x86.exe if it's running")
+        raise SystemExit(f"can't replace {out} ({e.strerror}): close FF1-recomp.exe if it's running")
     os.makedirs(out)
 
     # game.love: the front end, zipped; fused after love.exe
@@ -81,7 +81,7 @@ def main():
         for name in os.listdir(os.path.join(PORT, "love")):
             if name.endswith(".lua"):
                 z.write(os.path.join(PORT, "love", name), name)
-    with open(os.path.join(out, "FF1-x86.exe"), "wb") as f:
+    with open(os.path.join(out, "FF1-recomp.exe"), "wb") as f:
         f.write(open(love_exe, "rb").read())
         f.write(open(game, "rb").read())
     os.remove(game)
@@ -93,8 +93,8 @@ def main():
     shutil.copy(dll, out)
     open(os.path.join(out, "README.txt"), "w", encoding="utf-8", newline="\r\n").write(PLAYER_README)
 
-    archive = os.path.join(PORT, "release", "FF1-x86-windows")
-    shutil.make_archive(archive, "zip", os.path.join(PORT, "release"), "FF1-x86")
+    archive = os.path.join(PORT, "release", "FF1-recomp-windows")
+    shutil.make_archive(archive, "zip", os.path.join(PORT, "release"), "FF1-recomp")
     print(f"wrote {out} and {archive}.zip:")
     for name in sorted(os.listdir(out)):
         print(f"  {name}  {os.path.getsize(os.path.join(out, name))} bytes")
