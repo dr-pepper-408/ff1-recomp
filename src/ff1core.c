@@ -26,6 +26,8 @@
 #include "apu.h"
 #include "config.h"
 #include "../data/generated/palette_data.h"
+#include "../data/generated/menu_data.h"
+#include "../data/generated/battle_ui.h"
 
 #define SAMPLE_RATE 44100
 #define SCREEN_TILE 7           /* the party's tile on screen (game.c PLAYER_SCREEN_TILE) */
@@ -1525,4 +1527,18 @@ FF1_API void ff1_landmark_pixels(int i, uint8_t* rgba) {
                     }
             }
         }
+}
+
+FF1_API void ff1_class_sprite(int cls, uint8_t* rgba) {
+    const uint8_t* pal = BattleSpritePalettes + (lutClassBatSprPalette[cls % 12] & 3) * 4;
+    memset(rgba, 0, 16 * 24 * 4);
+    for (int k = 0; k < 6; k++) {
+        const uint8_t* t = Ppu_ChrTile(CHR_BANK_09, 0x100 + cls * 32 + k);
+        if (!t) continue;
+        for (int r = 0; r < 8; r++)
+            for (int c = 0; c < 8; c++) {
+                int ci = chr_pixel(t, r, c);
+                if (ci) nes_rgba(pal[ci], rgba + (((k >> 1) * 8 + r) * 16 + (k & 1) * 8 + c) * 4);
+            }
+    }
 }

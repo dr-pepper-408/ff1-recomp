@@ -37,6 +37,7 @@ typedef struct { float x, y, z, u, v; uint8_t r, g, b, a; } Ff1Vertex;
 int ff1_load_rom(const char* path);
 const char* ff1_rom_message(int status);
 int ff1_init(const char* save_path, int new_game);
+void ff1_class_sprite(int cls, uint8_t* rgba);
 void ff1_quit(void);
 void ff1_frame(int buttons);
 int ff1_audio(int16_t* out, int max);
@@ -322,6 +323,27 @@ function start_game()
     if core.ff1_init(save_file, start_new) ~= 0 then error("ff1_init failed") end
     core.ff1_set_encounters(opt.encounters and 1 or 0)
     started, rom_prompt = true, nil
+    set_icon()
+end
+
+-- The window's icon: the Black Mage (class 5), from the player's ROM, its
+-- 16 x 24 sprite centred in a square and scaled up 2x.
+function set_icon()
+    local spr = ffi.new("uint8_t[?]", 16 * 24 * 4)
+    core.ff1_class_sprite(5, spr)
+    local icon = love.image.newImageData(48, 48)
+    for y = 0, 23 do
+        for x = 0, 15 do
+            local p = spr + (y * 16 + x) * 4
+            if p[3] > 0 then
+                for d = 0, 3 do
+                    icon:setPixel(8 + x * 2 + d % 2, y * 2 + math.floor(d / 2),
+                                  p[0] / 255, p[1] / 255, p[2] / 255, 1)
+                end
+            end
+        end
+    end
+    love.window.setIcon(icon)
 end
 
 -- A file dropped on the window: if it's Final Fantasy (USA), keep a copy
