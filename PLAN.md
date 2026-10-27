@@ -1,15 +1,22 @@
 # FF1-x86 — Full Port Plan
 
 Goal: a complete, playable C99 port of *Final Fantasy* (NES), from title screen
-to "The End", reimplemented from the disassembly in the parent directory.
+to "The End", reimplemented from a disassembly of the original.
 SDL3 stays the platform layer for now; abstracting it is a later task (see
 [SDL containment](#sdl-containment-rule) for the one low-cost rule we follow
 in the meantime).
 
-Status at the time of writing: roughly 20–25% of a playable game. Rendering,
-overworld walking, standard-map loading, the field menu and the battle
-skeleton (turn order, enemy AI) exist. Most world, story and progression
-systems do not. See the assessment in the README "Status" / "Known issues".
+**Status:** done. Phases 0–7 are complete and milestones M1–M5 are reached:
+the whole game can be played from the title screen to "The End". The game's
+data is read from the player's ROM (see `PLAN_ROM.md`). What remains open:
+
+- abstracting the platform layer (SDL3), out of scope here;
+- optional fixes for the original's bugs: none exist yet (the bugs are
+  reproduced and marked `BUGGED`);
+- reference traces from an emulator and `.sav` compatibility checks
+  (verification 2 and 3 below) are not part of this repository.
+
+The 3D view has its own open points, listed in `PLAN_3D.md`.
 
 ---
 
@@ -21,11 +28,12 @@ systems do not. See the assessment in the README "Status" / "Known issues".
    Invented formulas are bugs.
 2. **Faithful by default, fixes behind flags.** Known ROM bugs (the biased
    turn shuffle, spells whose effects don't work, the INT stat doing nothing)
-   are reproduced. Optional fixes go behind `FF1_FIX_*` switches in
-   `config.h`, off by default.
-3. **All game data comes from generated headers.** No hand-typed tables, no
-   runtime reads of `bank_*.dat`. `tools/extract_*.py` is the only path from
-   the disassembly to C.
+   are reproduced. Optional fixes would go behind switches, off by default
+   (none exist yet).
+3. **No hand-typed game data.** The tables were first generated from the
+   disassembly by `tools/extract_*.py`; they are now read from the player's
+   ROM at startup (`src/romdata.c`, see `PLAN_ROM.md`), and the headers in
+   `data/generated/` hold declarations only.
 4. **Each milestone ends playable.** Milestones are story checkpoints, so
    every phase can be verified by actually playing up to that point.
 5. **Update and draw are separate.** Game logic must run without a renderer
@@ -33,13 +41,12 @@ systems do not. See the assessment in the README "Status" / "Known issues".
 
 ### SDL containment rule
 
-Until the platform layer is abstracted, only these files may include
-`<SDL3/SDL.h>`: `main.c`, `input.c`, `render_*.c`, `ui.c` (new) and
-`audio.c` (new). Game-logic modules (`game.c`, `battle.c`, `menu.c`,
-`party.c`, `event.c`, ...) take plain C types. Each module exposes
-`X_Update(ctx, input)` (no SDL) and `X_Draw(renderer, ctx)` (SDL), as
-`battle.c` and `menu.c` already roughly do. This keeps the future
-abstraction to a handful of files.
+Until the platform layer is abstracted, only `main.c`, `input.c` and
+`audio.c` include `<SDL3/SDL.h>`. Everything else, game logic and
+rendering alike, takes plain C types and draws into the NES-style frame
+buffer (`ppu.c`); `ff1core.c` builds the same game as a library without
+SDL for the LÖVE front end. This keeps the future abstraction to a handful
+of files.
 
 ---
 
@@ -100,6 +107,8 @@ with correct text, enter the Temple of Fiends and trigger Garland.
 
 Replace every approximated formula with the real routine.
 
+**Status:** done.
+
 | # | Task | Ports |
 |---|------|-------|
 | 2.1 | ✅ Physical attacks: hit chance, multi-hit, criticals, damage roll, category/weakness bonuses | `DoPhysicalAttack`, `PlayerAttackEnemy_Physical`, `EnemyAttackPlayer_Physical` |
@@ -110,7 +119,7 @@ Replace every approximated formula with the real routine.
 | 2.6 | ✅ Surprise and preemptive rounds; weighted formation selection | `GetBattleFormation`, `PrepareEnemyFormation` |
 | 2.7 | ✅ Formation types: 9-small, 4-large, mixed, fiend, Chaos (layout, targeting, palettes; exact cursor spots with 2.11) | `PrepareEnemyFormation_*`, `DrawFormation_*`, `EnemyTargetMenu_*` |
 | 2.8 | ✅ **Level-up** and EXP split | `LvlUp_*`, `DivideRewardBySurvivors`, `GiveRewardToParty` |
-| 2.9 | ✅ End of battle and game over (restarts the game until the title screen exists) | `EndOfBattleWrapUp`, `BattleOver_ProcessResult`, `GameOver` |
+| 2.9 | ✅ End of battle and game over (back to the title screen) | `EndOfBattleWrapUp`, `BattleOver_ProcessResult`, `GameOver` |
 | 2.10 | ✅ Party re-sort by ailment, in-battle/out-of-battle stat conversion | `ReSortPartyByAilment`, `ConvertOBStatsToIB`/`ConvertIBStatsToOB` |
 | 2.11 | ✅ Battle presentation: combat boxes, message buffer, enemy attack names | `DrawCombatBox*`, `DrawBattleMessage`, `ShowAltBattleMessage` |
 | 2.12 | ✅ Animations: walk-forward-and-strike, weapon sprites, magic flash, enemy death/explosions, screen shake, fanfare | `WalkForwardAndStrike`, `DrawWeaponGraphicRow`, `DoMagicFlash`, `EraseSmallEnemy`, `DrawExplosions`, `BattleScreenShake`, `PlayFanfareAndCheer` |
@@ -123,6 +132,8 @@ levels up correctly.
 ---
 
 ## Phase 3 — Towns: shops, inns, clinics, saving
+
+**Status:** done.
 
 | # | Task | Ports |
 |---|------|-------|
@@ -141,6 +152,8 @@ and continue from the save.
 ---
 
 ## Phase 4 — Front end
+
+**Status:** done; milestone M1 reached.
 
 | # | Task | Ports |
 |---|------|-------|
@@ -165,6 +178,8 @@ scene (`EnterBridgeScene`) and cross the bridge.
 
 ## Phase 5 — Overworld completeness and vehicles
 
+**Status:** done; milestones M2 and M3 reached.
+
 | # | Task | Ports |
 |---|------|-------|
 | 5.1 | ✅ Overworld objects: ship, airship (with the Floater's flashing), canal sprites, and the full `DrawOWSprites` order per vehicle (in the ship the bridge and canal are drawn over the mapman; the bridge itself is done in 4.7) | `DrawOWSprites`, `DrawOWObj_*` |
@@ -187,6 +202,8 @@ Ice Cave, the Floater, the airship, Bahamut's class change, Kary.
 
 ## Phase 6 — Endgame
 
+**Status:** done; milestones M4 and M5 reached.
+
 | # | Task | Ports |
 |---|------|-------|
 | 6.1 | ✅ Remaining key-item flows (all `Talk_*` handlers, `UseItem_*`, gate tiles already ported in 1.4-1.6 and 3.7; tests now cover the submarine): Oxyale, Cube, Slab/Unne, Chime, Lefein, submarine, Mirage Tower ↔ Flying Fortress | `UseItem_*`, `Talk_*`, `SMMove_*` |
@@ -200,6 +217,8 @@ finished from a new save.
 ---
 
 ## Phase 7 — Audio (can run in parallel from Phase 1 onward)
+
+**Status:** done.
 
 | # | Task | Ports |
 |---|------|-------|
@@ -217,12 +236,15 @@ data pipeline consistent and needs no extra assets.
 ## Verification strategy
 
 There is no checksum to compare against, so we build our own reference.
+In this repository: 1 (`build/ff1-tests`, 463 checks) and the screenshot
+scenarios (`build/ff1-screenshots`, 40 scripted scenes with PASS/FAIL
+checks). The emulator traces and save files of 2–4 are not part of it.
 
 1. **Unit tests (`ctest`)** for pure logic: decoders, number formatting,
    damage/hit formulas, level-up, shop prices, equip legality, save checksum.
    Expected values are worked out by hand from the assembly and cited in the
    test.
-2. **Reference traces from the original.** The parent directory builds the
+2. **Reference traces from the original.** The disassembly builds the
    ROM (`build.bat`, ca65/ld65). Run it in a Lua-scriptable emulator
    (e.g. Mesen), seed RNG state, script inputs, and dump RAM snapshots
    (party stats, enemy HP, flags) at key points. A port test replays the same
@@ -237,8 +259,9 @@ There is no checksum to compare against, so we build our own reference.
 
 ## Data extraction backlog
 
-✅ Done: everything comes from `tools/extract_data.py` into `data/generated/`,
-and nothing is read from `bank_*.dat` at runtime.
+✅ Done: every table was extracted by `tools/extract_data.py` into
+`data/generated/`; since `PLAN_ROM.md` they are read from the player's ROM
+at startup instead, and the headers hold declarations only.
 
 - ✅ Map object lists, NPC sprites and talk handlers (`mapobj_data.h`, `dialogue.h`)
 - ✅ Item/equipment prices (`item_data.h`) and shop inventories (`shop_data.h`)

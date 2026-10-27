@@ -16,14 +16,15 @@ It has two front ends:
 > **No game data is included.** This repository contains code only. To
 > build and play it you need your own copy of *Final Fantasy* (USA) for the
 > NES, as a ROM file. Nothing from the game is committed: the data is
-> generated from your ROM and git-ignored.
+> read from your ROM when the game starts.
 
 ## Status
 
 The whole game is playable: title screen, party creation, the overworld
 and its vehicles, towns, shops, dungeons, battles, menus, saving, music and
 sound, the minigame, and the ending. See `PLAN.md` (the port),
-`PLAN_3D.md` (the 3D view) and `PLAN_ROM.md` (building from your ROM).
+`PLAN_3D.md` (the 3D view, with its open points) and `PLAN_ROM.md`
+(reading the data from your ROM).
 
 ## Requirements
 

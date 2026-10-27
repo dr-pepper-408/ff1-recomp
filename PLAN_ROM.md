@@ -4,9 +4,12 @@ Goal: a prebuilt game (the LÖVE version first) that contains no data from
 Final Fantasy. On first launch the player gives it their own ROM of Final
 Fantasy (USA); the game checks it and reads everything it needs from it.
 
-Today the data comes from `tools/extract_data.py`, which reads the
-disassembly's `bank_XX.dat`, `bin/*.bin` and `bank_XX.asm` files and writes
-`data/generated/*.h`, compiled into the game (and committed).
+**Status:** done (R1–R6). Before this plan, the data came from
+`tools/extract_data.py`, which read the disassembly's `bank_XX.dat`,
+`bin/*.bin` and `bank_XX.asm` files and wrote `data/generated/*.h`, compiled
+into the game (and committed). Now the game reads every table from the
+player's ROM at startup (`src/rom.c`, `src/romdata.c`), and the release
+(`tools/make_release.py`) holds no game data.
 
 ## Principles
 
@@ -31,9 +34,9 @@ disassembly's `bank_XX.dat`, `bin/*.bin` and `bank_XX.asm` files and writes
 
 ## Note on history
 
-The generated headers with the game's data are in this repository's past
-commits. Before publishing it, the history needs rewriting (or a fresh
-repository); that is left to the owner.
+The generated headers with the game's data stay in the development
+repository's history. This public repository was started with a fresh
+history and contains none of it.
 
 ## For development
 
@@ -41,8 +44,9 @@ repository); that is left to the owner.
 cmake --build build            # needs nothing from the game
 FF1_ROM=<rom> build/ff1-tests  # the tests read the ROM
 ```
-When tables change: `python tools/build_rom.py` (the disassembly's
-listings), `python tools/extract_data.py` (regenerates the table list and
+When tables change (this needs the development tree with the
+disassembly; it can't be done from this repository alone):
+`python tools/build_rom.py` (the disassembly's listings), `python tools/extract_data.py` (regenerates the table list and
 storage, and their data for the check), then build, run
 `build/ff1-dump-ref ref.txt` and `python tools/find_slices.py ref.txt`
 (the layout), and check `build/ff1-dump-rom <rom> rom.txt` equals ref.txt.
