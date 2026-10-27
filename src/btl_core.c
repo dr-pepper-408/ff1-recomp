@@ -229,7 +229,7 @@ static void mag_apply_damage(MagMath* mm, BtlMagDefender* d, BtlMagResult* r) {
     r->damage = mm->basedamage;
 }
 
-/* BtlMag_ApplyAilments: add the ailments, saying "Ineffective" if the
+/* BtlMag_ApplyAilments: add the ailments, saying BTLMSG_INEFFECTIVE if the
  * defender already had any of them (they are added regardless). */
 static void mag_apply_ailments(const BtlMagic* m, BtlMagDefender* d, BtlMagResult* r) {
     if (m->effectivity & d->ailments) mag_say(r, BTLMSG_INEFFECTIVE);
@@ -328,7 +328,7 @@ static void mag_do_effect(MagMath* mm, const BtlMagic* m, BtlMagDefender* d, Btl
         r->connected = 1;
         break;
 
-    case 0x0C:  /* BtlMag_Effect_Fast: up to x2, "Ineffective" beyond */
+    case 0x0C:  /* BtlMag_Effect_Fast: up to x2, BTLMSG_INEFFECTIVE beyond */
         r->connected = 1;
         if (++d->numhitsmult >= 3) {
             r->connected = 0;

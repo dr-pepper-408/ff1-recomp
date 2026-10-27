@@ -11,5 +11,5 @@
 
 /* lut_BattleRates: entry 0 is the overworld (unused: its rate is
  * hard-coded), entry map+1 is standard map `map`. */
-extern const uint8_t lut_BattleRates[64];
+extern uint8_t lut_BattleRates[64];
 

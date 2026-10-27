@@ -13,6 +13,8 @@
 #include <math.h>
 #include <stdint.h>
 #include "ff1core.h"
+#include "rom.h"
+#include "romdata.h"
 #include "game.h"
 #include "battle.h"
 #include "text.h"
@@ -35,7 +37,16 @@ static int16_t audio_buf[2048];
 static int audio_n;
 static double frame_samples;
 
+FF1_API int ff1_load_rom(const char* path) {
+    return (int)RomData_Open(path);
+}
+
+FF1_API const char* ff1_rom_message(int status) {
+    return Rom_StatusText((RomStatus)status);
+}
+
 FF1_API int ff1_init(const char* save_path, int new_game) {
+    if (!Rom_Data()) return 2;                    /* (ff1_load_rom first) */
     if (OWMap_Init() != 0) return 1;
     Game_SetSavePath(save_path);
     Apu_Reset();

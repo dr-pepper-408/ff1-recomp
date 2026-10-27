@@ -28,46 +28,51 @@ sound, the minigame, and the ending. See `PLAN.md` (the port),
 ## Requirements
 
 - CMake 3.10+ and a C99 compiler (tested with MinGW-w64 GCC on Windows)
-- Python 3 (to generate the game data from your ROM)
 - SDL3 is included under `src/SDL3/` (zlib licence)
 - [LÖVE 11.5](https://love2d.org) for the 3D front end
-- A ROM of **Final Fantasy (USA)** for the NES, the original 1990 North
-  American release, unmodified (tested with a dump named
+- To play: a ROM of **Final Fantasy (USA)** for the NES, the original 1990
+  North American release, unmodified (tested with a dump named
   `Final Fantasy (USA).nes`). The file's 16-byte header may be iNES or
   NES 2.0, or missing; what is checked is the 256 KB of game data after it,
   whose SHA-1 must be `c9cfbf5455085e198dce039298b083cd6fc88bce`.
   Other versions don't work: the Japanese release, the Famicom
   *Final Fantasy I・II*, the remakes, and translated or hacked ROMs.
 
-For now, generating the data also needs the FF1 disassembly this port was
-written against, in the folder above this one: the extractor takes the
-tables' addresses from its assembler listings. Removing that dependency, so
-that a ROM alone is enough, is the next step of `PLAN_ROM.md`.
+The game reads everything it needs from the ROM when it starts
+(`src/rom.c`, `src/romdata.c`); nothing from the game is built in.
 
 ## Build
 
 ```sh
-python tools/build_rom.py         # assembler listings (and a reference ROM) from the disassembly
-FF1_ROM=path/to/your.nes python tools/extract_data.py   # the game data, from your ROM
 cmake -S . -B build
 cmake --build build
 ```
 
-Without `FF1_ROM`, the extractor uses the reference ROM `build_rom.py`
-writes. The generated data goes to `data/generated/data/` (git-ignored).
-
-Tests:
+Tests (they need the ROM: set `FF1_ROM` to its path):
 
 ```sh
 build/ff1-tests                    # unit tests of the game logic
 build/ff1-screenshots <dir>        # scripted scenes, PASS/FAIL, PPM screenshots
 ```
 
+## Release
+
+```sh
+python tools/make_release.py       # release/FF1-x86/ and release/FF1-x86-windows.zip
+```
+
+A ready-to-play Windows folder of the LÖVE version (LÖVE fused in, its
+runtime, `ff1core.dll`), with no game data: players run `FF1-x86.exe` and
+drop their ROM on the window the first time.
+
 ## Run
 
-- SDL3: `build/ff1-x86` (`--new` skips the title screen).
 - LÖVE: `love love` from this folder (`lovec` on Windows shows a console).
+  The first time, it asks for the ROM: drag the file onto the window. It is
+  checked and kept in LÖVE's save folder, so it's asked for only once.
   `--new` skips the title screen.
+- SDL3: `build/ff1-x86 --rom <file>`, or put the ROM beside the program as
+  `FinalFantasy.nes` (`FF1_ROM` works too). `--new` skips the title screen.
 
 | Key | Action |
 |-----|--------|
@@ -95,8 +100,9 @@ LÖVE front end only:
 src/            the game (C99); main.c, input.c, audio.c are the only SDL files
 src/ff1core.c   the game as a library for other front ends (the LÖVE one)
 love/           the LÖVE front end and 3D view
-tools/          the data extractor and helpers (Python 3)
-data/generated/ declarations of the game's tables (their data: generated, git-ignored)
+src/romdata.c   the game's tables, read from the player's ROM
+tools/          development tools (Python 3): the table list, the layout, checks
+data/generated/ declarations of the game's tables (no data)
 tests/          unit tests and screenshot scenarios
 ```
 

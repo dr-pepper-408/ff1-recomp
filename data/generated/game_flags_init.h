@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 #define GAME_FLAGS_SIZE 256
-extern const uint8_t init_game_flags[];
+extern uint8_t init_game_flags[256];
 
 #define UNSRAM_FIRST_PAGE_SIZE 256
-extern const uint8_t init_unsram_first_page[];
+extern uint8_t init_unsram_first_page[256];

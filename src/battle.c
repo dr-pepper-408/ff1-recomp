@@ -1166,7 +1166,7 @@ static void player_do_magic(SaveData* save, int p, uint8_t attackid, int source,
     g_btl.fakeout_ail = 0;
     s_playerhitsfx = BSFX_MAGIC;
 
-    /* Muted: "Silenced", for MAGIC and also (arguably BUGGED) DRINK and ITEM.
+    /* Muted: the silenced message, for MAGIC and also (arguably BUGGED) DRINK and ITEM.
      * The MP or potion is already spent. */
     if (save->characters[p].ailments & BTL_AIL_MUTE) {
         ev_msg_clear_all(BTLMSG_SILENCED);
@@ -1240,7 +1240,7 @@ static void enemy_do_magic(SaveData* save, int eidx, uint8_t attackid) {
         ev_clear_all();
         return;
     }
-    if (g_btl.enemy[eidx].ail & BTL_AIL_MUTE) {           /* muted: "Ineffective" */
+    if (g_btl.enemy[eidx].ail & BTL_AIL_MUTE) {           /* muted: BTLMSG_INEFFECTIVE */
         ev_msg_clear_all(BTLMSG_INEFFECTIVE);
         return;
     }
@@ -1279,8 +1279,8 @@ static void enemy_do_magic(SaveData* save, int eidx, uint8_t attackid) {
 #define EOBMSG_LEVUP    0x30   /* "Lev. up!" */
 #define EOBMSG_HPMAX    0x31   /* "HP max" */
 #define EOBMSG_PTS      0x32   /* "pts." */
-#define EOBMSG_PERISHED 0x3C   /* "perished" */
-#define EOBMSG_MONSTERS 0x3D   /* "Monsters " */
+#define EOBMSG_PERISHED 0x3C   /* (end-of-battle text) */
+#define EOBMSG_MONSTERS 0x3D   /* (end-of-battle text) */
 #define EOBMSG_PARTY    0x3E   /* " party " */
 #define EOBMSG_EXPUP    0x49   /* "EXP up" */
 
@@ -1291,7 +1291,7 @@ static void ev_eob_next(void) {
     ev_clear_all();
 }
 
-/* EndOfBattleWrapUp: "Monsters perished", the EXP share and gold, then each
+/* EndOfBattleWrapUp: the monsters-perished message, the EXP share and gold, then each
  * character's EXP and level up, in the combat boxes. */
 static void victory_rewards(SaveData* save) {
     BtlText t;

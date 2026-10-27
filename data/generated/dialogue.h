@@ -11,4 +11,4 @@
 
 #define DIALOGUE_COUNT 257
 
-extern const char *dialogue_table[DIALOGUE_COUNT];
+

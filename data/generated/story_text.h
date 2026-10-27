@@ -9,4 +9,4 @@
 
 #include <stdint.h>
 
-extern const char story_text_text[];
+

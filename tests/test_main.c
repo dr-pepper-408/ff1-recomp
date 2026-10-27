@@ -19,6 +19,7 @@
 #include "music.h"
 #include "sfx.h"
 #include "rom.h"
+#include "romdata.h"
 #include <stdlib.h>
 #include <math.h>
 #include "../data/generated/rng_table.h"
@@ -309,7 +310,7 @@ static void test_battle_rules(void) {
     }
     CHECK(hits > 200);
 
-    /* A dead or stoned defender: "Ineffective", nothing changes. */
+    /* A dead or stoned defender: BTLMSG_INEFFECTIVE, nothing changes. */
     BtlDefender dead = { .ailments = BTL_AIL_STONE, .hp = 7 };
     Btl_PhysicalAttack(&a, &dead, 0, &r);
     CHECK(r.ineffective && dead.hp == 7 && dead.ailments == BTL_AIL_STONE);
@@ -386,7 +387,7 @@ static void test_magic(void) {
     }
     CHECK(ok);
 
-    /* Killing: DEAD is added, "Terminated" (enemies) / "Slain.." (players). */
+    /* Killing: DEAD is added, BTLMSG_TERMINATED (enemies) / BTLMSG_SLAIN (players). */
     {
         BtlMagic m = spell(SP_FIRE);
         BtlMagDefender d = { .hp = 3, .ailments = BTL_AIL_POISON };
@@ -398,7 +399,7 @@ static void test_magic(void) {
         CHECK(has_msg(&r, BTLMSG_SLAIN));
     }
 
-    /* HARM only hurts undead (category bit 3), else "Ineffective". */
+    /* HARM only hurts undead (category bit 3), else BTLMSG_INEFFECTIVE. */
     {
         BtlMagic m = spell(SP_HARM);
         BtlMagDefender d = { .hp = 100, .category = 0 };
@@ -420,7 +421,7 @@ static void test_magic(void) {
         CHECK(full.hp == 100);
     }
 
-    /* SLEP on a sleeper: the ailment is "added" again with "Ineffective". */
+    /* SLEP on a sleeper: the ailment is "added" again with BTLMSG_INEFFECTIVE. */
     {
         BtlMagic m = spell(SP_SLEP);
         int asleep = 0, again = 0;
@@ -459,7 +460,7 @@ static void test_magic(void) {
         CHECK(!any);
     }
 
-    /* FAST stops at x2 ("Ineffective"); SLOW at 0 stays 0 but "works". */
+    /* FAST stops at x2 (BTLMSG_INEFFECTIVE); SLOW at 0 stays 0 but "works". */
     {
         BtlMagic m = spell(SP_FAST);
         BtlMagDefender d = { .hp = 50, .numhitsmult = 1 };
@@ -510,7 +511,7 @@ static void test_magic(void) {
         CHECK(stopped);
     }
 
-    /* PURE potion: cures poison, "Neutralized", and no "HP up!". */
+    /* PURE potion: cures poison, BTLMSG_NEUTRALIZED, and no HP-up message. */
     {
         const MagicData* pm = &magic_table[POT_PURE];
         BtlMagic m = { pm->effect, pm->element, pm->hit_rate, pm->effectivity };
@@ -865,6 +866,16 @@ static void test_rom(void) {
 }
 
 int main(void) {
+    /* The game's data comes from a ROM: $FF1_ROM, or the reference one
+     * tools/build_rom.py writes beside the project. */
+    static const char* const roms[] = { "../FinalFantasy.nes", "../../FinalFantasy.nes", NULL };
+    RomStatus st = RomData_Find(NULL, roms);
+    if (st != ROM_OK) {
+        printf("No ROM of Final Fantasy (USA): set FF1_ROM. Only the ROM checks run.\n");
+        test_rom();
+        printf("%d checks, %d failed\n", g_checks, g_failures);
+        return g_failures ? 1 : 0;
+    }
     test_print_number();
     test_text();
     test_rng();

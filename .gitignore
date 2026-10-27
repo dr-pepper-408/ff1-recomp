@@ -18,3 +18,6 @@ data/overworld_rle.bin
 # ROMs: the game itself, never committed
 *.nes
 *.NES
+
+# Release builds (tools/make_release.py)
+release/

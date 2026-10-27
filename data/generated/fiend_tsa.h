@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 /* 4 fiends (by formation graphic assignment): 8x8 tiles + 16 attribute bytes. */
-extern const uint8_t fiend_tsa[4][0x50];
+extern uint8_t fiend_tsa[4][0x50];
 
 /* Chaos: 14x12 tiles, then 16 attribute bytes (and 8 bytes of padding). */
-extern const uint8_t chaos_tsa[192];
+extern uint8_t chaos_tsa[192];

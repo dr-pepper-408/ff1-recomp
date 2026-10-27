@@ -11,6 +11,7 @@
  * King of Coneria.
  */
 
+#include "romdata.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -164,6 +165,9 @@ int main(int argc, char** argv) {
     const InputState none = { 0, 0, 0 };
     const InputState start = { BTN_START, BTN_START, 0 };
 
+    static const char* const roms[] = { "../FinalFantasy.nes", "../../FinalFantasy.nes", NULL };
+    RomStatus st = RomData_Find(NULL, roms);
+    if (st != ROM_OK) { printf("No ROM of Final Fantasy (USA) (set FF1_ROM): %s\n", Rom_StatusText(st)); return 1; }
     if (OWMap_Init() != 0) { printf("OWMap_Init failed\n"); return 1; }
     snprintf(save_path, sizeof(save_path), "%s/ff1-screenshots.sav", dir);
     remove(save_path);                /* every run starts with no save */
@@ -423,7 +427,7 @@ int main(int argc, char** argv) {
             step((frames % 8) == 0 ? &a : &none, 1);
             frames++;
         }
-        step(&a, 1); step(&none, 2);                      /* past "Monsters perished" */
+        step(&a, 1); step(&none, 2);                      /* past the monsters-perished message */
         shot(dir, "battle_rewards");
         step(&a, 1); step(&none, 2);                      /* the level up */
         shot(dir, "battle_levelup");
@@ -690,7 +694,7 @@ int main(int argc, char** argv) {
 
     /* Game over (last: it restarts the game).  Only the first character is
      * standing, with 1 HP and poison, so the round's end finishes them:
-     * "<Name> party perished", then the game starts over. */
+     * the party-perished message, then the game starts over. */
     {
         const InputState a = { BTN_A, BTN_A, 0 };
         g_ctx.mode = MODE_OW;

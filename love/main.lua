@@ -23,7 +23,9 @@
   captures), --auto (tap A every 16 frames: fight through menus),
   --enter=N (go through overworld entrance N: 1 Coneria, 2 Pravoka...),
   --inroom (with --enter: as if through a door, the rooms' insides shown),
-  --dialogue=N (show dialogue N, as talking does), --2d (start in 2D), --landmark-refs (write
+  --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
+  --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
+  FILE were dropped on the ROM prompt), --landmark-refs (write
   reference pictures of the overworld's landmarks to the save folder's
   landmarks/, for modelling them, then quit).
 ]]
@@ -32,6 +34,8 @@ local ffi = require("ffi")
 
 ffi.cdef [[
 typedef struct { float x, y, z, u, v; uint8_t r, g, b, a; } Ff1Vertex;
+int ff1_load_rom(const char* path);
+const char* ff1_rom_message(int status);
 int ff1_init(const char* save_path, int new_game);
 void ff1_quit(void);
 void ff1_frame(int buttons);
@@ -308,11 +312,70 @@ local function load_settings()
     cam.dist, cam.pitch, cam.fov = pr.dist, pr.pitch, pr.fov
 end
 
+-- ---- The ROM ----
+
+ROM_COPY = "rom.nes"               -- the player's ROM, kept in the save folder
+started = false                    -- the game is running (a ROM was found)
+rom_prompt = nil                   -- asking for the ROM: "" or why the last one failed
+
+function start_game()
+    if core.ff1_init(save_file, start_new) ~= 0 then error("ff1_init failed") end
+    core.ff1_set_encounters(opt.encounters and 1 or 0)
+    started, rom_prompt = true, nil
+end
+
+-- A file dropped on the window: if it's Final Fantasy (USA), keep a copy
+-- and start; else say why not.
+function love.filedropped(file)
+    if started then return end
+    file:open("r")
+    local data = file:read()
+    file:close()
+    love.filesystem.write(ROM_COPY .. ".new", data)
+    local path = love.filesystem.getSaveDirectory() .. "/" .. ROM_COPY .. ".new"
+    local status = core.ff1_load_rom(path)
+    if status == 0 then
+        love.filesystem.write(ROM_COPY, data)
+        love.filesystem.remove(ROM_COPY .. ".new")
+        start_game()
+    else
+        love.filesystem.remove(ROM_COPY .. ".new")
+        rom_prompt = ffi.string(core.ff1_rom_message(status))
+    end
+end
+
+local function draw_rom_prompt()
+    local w, h = love.graphics.getDimensions()
+    love.graphics.clear(0.02, 0.03, 0.12, 1)
+    local lines = {
+        "FINAL FANTASY",
+        "",
+        "This game needs your copy of Final Fantasy (USA) for the NES, as a ROM file.",
+        "Drag it onto this window.",
+        "",
+        "It is checked, then kept in the game's save folder for next time.",
+    }
+    if rom_prompt ~= "" then
+        lines[#lines + 1] = ""
+        lines[#lines + 1] = "That file can't be used: " .. rom_prompt
+    end
+    local y = h / 2 - #lines * 12
+    for _, l in ipairs(lines) do
+        love.graphics.printf(l, 0, y, w, "center")
+        y = y + 24
+    end
+end
+
 function love.load(args)
     load_settings()
     local src = love.filesystem.getSource()
+    -- The game library: beside the program in a release (fused), else the
+    -- development build next to the project.
+    local release = love.filesystem.getSourceBaseDirectory() .. "/ff1core.dll"
     local build = src .. "/../build/"
-    core = ffi.load(build .. "ff1core.dll")
+    local dev = love.filesystem.getInfo ~= nil and io.open(build .. "ff1core.dll", "rb")
+    if dev then dev:close() end
+    core = ffi.load(dev and (build .. "ff1core.dll") or release)
     local new_game = 0
     for _, a in ipairs(args) do
         if a == "--new" then new_game = 1 end
@@ -322,6 +385,9 @@ function love.load(args)
         if a == "--auto" then auto_a = 0 end
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then view3d = false end
+        if a == "--ask-rom" then ask_rom = true end
+        local dp = a:match("^%-%-drop=(.+)$")              -- (as if this file were dropped)
+        if dp then ask_rom, drop_path = true, dp end
         if a == "--landmark-refs" then new_game, refs_at = 1, 90 end
         local dl = a:match("^%-%-dialogue=(%w+)$")
         if dl then dialogue_at, dialogue_id = 120, tonumber(dl) end
@@ -348,11 +414,26 @@ function love.load(args)
         local deg = a:match("^%-%-yaw=(%-?%d+)$")
         if deg then yaw = math.rad(tonumber(deg)) end
     end
-    -- The same SRAM file as the SDL build (next to ff1-x86.exe)
-    if core.ff1_init(build .. "ff1.sav", new_game) ~= 0 then
-        error("ff1_init failed")
+    -- The game's data comes from the player's ROM: the copy kept from an
+    -- earlier run, $FF1_ROM, or the development one beside the project;
+    -- else the player is asked for it (love.filedropped).
+    -- The save: the development build's (shared with the SDL build), or
+    -- the save folder in a release.
+    save_file = dev and (build .. "ff1.sav") or (love.filesystem.getSaveDirectory() .. "/ff1.sav")
+    start_new = new_game
+    local tries = { love.filesystem.getSaveDirectory() .. "/" .. ROM_COPY, os.getenv("FF1_ROM"),
+                    src .. "/../../FinalFantasy.nes", src .. "/../FinalFantasy.nes" }
+    for _, path in pairs(tries) do
+        if ask_rom then break end                  -- (--ask-rom: show the prompt)
+        if path and core.ff1_load_rom(path) == 0 then start_game(); break end
     end
-    core.ff1_set_encounters(opt.encounters and 1 or 0)
+    if not started then rom_prompt = "" end
+    if drop_path then                              -- (--drop: the same as dropping it)
+        local fh = io.open(drop_path, "rb")
+        local data = fh and fh:read("*a") or ""
+        if fh then fh:close() end
+        love.filedropped({ open = function() end, read = function() return data end, close = function() end })
+    end
 
     love.graphics.setDefaultFilter("nearest", "nearest")
     screen_data = love.image.newImageData(256, 240, "rgba8")
@@ -422,6 +503,7 @@ local function buttons()
 end
 
 function love.update(dt)
+    if not started then return end
     acc = math.min(acc + dt, NES_FRAME * 4)
     local n = 0
     while acc >= NES_FRAME do
@@ -888,6 +970,21 @@ local function draw2d()
 end
 
 function love.draw()
+    if not started then
+        draw_rom_prompt()
+        if shot_frames then                        -- (--shot: the prompt is the picture)
+            shot_frames = shot_frames - 1
+            if shot_frames <= 0 then
+                love.graphics.captureScreenshot(function(img)
+                    img:encode("png", "shot.png")
+                    print("saved " .. love.filesystem.getSaveDirectory() .. "/shot.png")
+                    love.event.quit()
+                end)
+                shot_frames = nil
+            end
+        end
+        return
+    end
     core.ff1_draw(ffi.cast("uint8_t*", screen_data:getFFIPointer()))
     screen:replacePixels(screen_data)
     if view3d and core.ff1_view3d() == 1 then

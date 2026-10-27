@@ -18,4 +18,4 @@ typedef struct {
     uint8_t spell_id;       // +3: Spell cast
 } ArmorData;
 
-extern const ArmorData armor_table[ARMOR_COUNT];
+extern ArmorData armor_table[ARMOR_COUNT];

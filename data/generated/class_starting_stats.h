@@ -21,4 +21,4 @@ typedef struct {
     uint8_t mag_def;    // +A: ch_magdef
 } ClassStartingStats;
 
-extern const ClassStartingStats class_starting_stats[CLASS_STARTING_STATS_COUNT];
+extern ClassStartingStats class_starting_stats[CLASS_STARTING_STATS_COUNT];

@@ -10,16 +10,16 @@ set(SDL3_INCLUDE_DIR "${SDL3_ROOT}/include")
 set(SDL3_LIB_DIR "${SDL3_ROOT}/lib")
 set(SDL3_DLL "${SDL3_ROOT}/bin/SDL3.dll")
 
-# The game's data, generated from the ROM: python tools/build_rom.py, then
-# python tools/extract_data.py (data/generated/data/, never committed).
+# The game's data is read from the player's ROM at start-up (src/rom.c,
+# src/romdata.c): nothing from the game is built in.  The tables' storage:
+set(ROMDATA_SOURCES src/romdata_storage.c src/romdata.c)
+# (tools/extract_data.py's generated data, if present, only for the
+# ff1-dump-ref check below)
 file(GLOB ROM_DATA_SOURCES ${CMAKE_SOURCE_DIR}/data/generated/data/*.c)
-if(NOT ROM_DATA_SOURCES)
-    message(FATAL_ERROR "No game data: run python tools/build_rom.py, then python tools/extract_data.py")
-endif()
 
 # Source files
 set(SOURCES
-    ${ROM_DATA_SOURCES}
+    ${ROMDATA_SOURCES}
     src/main.c
     src/audio.c
     src/ppu.c
@@ -99,7 +99,7 @@ add_custom_command(TARGET ff1-x86 POST_BUILD
 # ---- Tests: SDL-free game logic (run with `ctest --test-dir build`) ----
 enable_testing()
 add_executable(ff1-tests
-    ${ROM_DATA_SOURCES}
+    ${ROMDATA_SOURCES}
     tests/test_main.c
     src/rom.c
     src/apu.c
@@ -121,7 +121,7 @@ add_test(NAME ff1-tests COMMAND ff1-tests)
 # Headless screenshots of a few scenes (PPM), for checking the renderer:
 #   build/ff1-screenshots <output-dir>
 add_executable(ff1-screenshots
-    ${ROM_DATA_SOURCES}
+    ${ROMDATA_SOURCES}
     tests/screenshots.c
     src/game.c
     src/party.c
@@ -160,3 +160,10 @@ endif()
 
 # Set the working directory for the executable to the project root
 set_property(TARGET ff1-x86 PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+# The game's tables as text, to check src/romdata.c against the extractor:
+#   ff1-dump-ref <out>  /  ff1-dump-rom <rom> <out>  -- the files must match.
+if(ROM_DATA_SOURCES)
+    add_executable(ff1-dump-ref ${ROM_DATA_SOURCES} tests/dump_tables.c)
+endif()
+add_executable(ff1-dump-rom src/romdata_storage.c src/romdata.c src/rom.c tests/dump_tables.c)
+target_compile_definitions(ff1-dump-rom PRIVATE DUMP_FROM_ROM)

@@ -12,4 +12,4 @@
 #define BATTLE_PALETTE_COUNT 8
 #define BATTLE_PALETTE_COLORS 16
 
-extern const uint8_t battle_palette_table[BATTLE_PALETTE_COUNT][BATTLE_PALETTE_COLORS * 2];
+extern uint8_t battle_palette_table[BATTLE_PALETTE_COUNT][BATTLE_PALETTE_COLORS * 2];

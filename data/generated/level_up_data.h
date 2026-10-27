@@ -16,13 +16,13 @@
 // Byte 0: bit5=strong HP, bit4=guaranteed Str, bit3=Agil, bit2=Int, bit1=Vit, bit0=Luck
 // Byte 1: MP up - each bit corresponds to a level of spell charge gained
 
-extern const uint8_t level_up_data[LEVEL_UP_CLASSES][LEVEL_UP_LEVELS][2];
+extern uint8_t level_up_data[LEVEL_UP_CLASSES][LEVEL_UP_LEVELS][2];
 
 /* bank_0B lut_ExpToAdvance: total EXP to reach the next level, by 0-based level. */
-extern const uint32_t lut_ExpToAdvance[49];
+extern uint32_t lut_ExpToAdvance[49];
 
 /* bank_0B lut_LvlUpHitRateBonus, by class. */
-extern const uint8_t lut_LvlUpHitRateBonus[12];
+extern uint8_t lut_LvlUpHitRateBonus[12];
 
 /* bank_0B lut_LvlUpMagDefBonus, by class. */
-extern const uint8_t lut_LvlUpMagDefBonus[12];
+extern uint8_t lut_LvlUpMagDefBonus[12];

@@ -27,8 +27,16 @@ typedef struct {
 #define FF1_ATLAS_H 256     ///< their cut-out copy (the floor colour clear)
 #define FF1_SPRITE_ATLAS 64 ///< Sprite atlas: 8 x 8 sprites of 8x8
 
-/** Start the game.  `save_path` is the SRAM file; `new_game` skips the
- *  title screen.  @return 0 on success. */
+/** Load the player's ROM of Final Fantasy (USA) and fill the game's tables
+ *  from it; before ff1_init.  @return 0 if it's ours, else a status for
+ *  ff1_rom_message. */
+FF1_API int ff1_load_rom(const char* path);
+
+/** A message for the player about a ff1_load_rom status. */
+FF1_API const char* ff1_rom_message(int status);
+
+/** Start the game (after ff1_load_rom).  `save_path` is the SRAM file;
+ *  `new_game` skips the title screen.  @return 0 on success. */
 FF1_API int ff1_init(const char* save_path, int new_game);
 FF1_API void ff1_quit(void);
 

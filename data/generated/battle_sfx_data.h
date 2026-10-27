@@ -5,6 +5,6 @@
 /* bank_0C data_BattleSoundEffects: 0 magic, 1 enemy attack, 2 player attack.
  * Header: frames, square blocks, noise blocks; then 8-byte blocks:
  * $4004 $4005 $4006 $4007 frames | $400C $400E frames. */
-extern const uint8_t data_BattleSoundEffects[81];
+extern uint8_t data_BattleSoundEffects[81];
 
-extern const uint16_t lut_BattleSfxOffset[3];
+extern uint16_t lut_BattleSfxOffset[3];

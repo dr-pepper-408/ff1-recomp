@@ -466,7 +466,7 @@ static void resume_item_menu(void) {
     draw_menu_string(0x03);
     clear_oam();
     if (!any) {
-        draw_desc_box(0x04);                    /* "You have nothing." */
+        draw_desc_box(0x04);                    /* (the empty inventory text) */
         wait_btn(C_RESUME_MAIN);
         return;
     }
@@ -935,7 +935,7 @@ static void after_wait(int a_held) {
             enter_item_menu();
             break;
         }
-        draw_desc_box(0x3F);                    /* "Now saving..!" */
+        draw_desc_box(0x3F);                    /* (the saving text) */
         M.save_request = 1;                     /* SaveGame */
         wait_btn(C_SAVED);
         break;

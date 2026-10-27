@@ -11,4 +11,4 @@
 
 #define MENU_TEXT_COUNT 96
 
-extern const char *menu_text_table[MENU_TEXT_COUNT];
+

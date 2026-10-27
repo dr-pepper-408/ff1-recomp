@@ -23,4 +23,4 @@ typedef struct {
     uint8_t qty_b[2];       // +14-+15: Min/max counts, Formation B
 } BattleFormation;
 
-extern const BattleFormation battle_formation_table[BATTLE_FORMATION_COUNT];
+extern BattleFormation battle_formation_table[BATTLE_FORMATION_COUNT];

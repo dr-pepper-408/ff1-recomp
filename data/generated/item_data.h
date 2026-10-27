@@ -16,4 +16,4 @@ typedef struct {
     uint16_t price;
 } ItemData;
 
-extern const ItemData item_table[ITEM_COUNT];
+

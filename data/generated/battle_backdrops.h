@@ -12,7 +12,7 @@
 #define BATTLE_BACKDROP_COUNT 16
 
 /* Overworld tile id (0..127) -> backdrop id (0..15, 0xFF = none). */
-extern const uint8_t backdrop_table[128];
+extern uint8_t backdrop_table[128];
 
 /* 4-color palette per backdrop (NES color indices; index 0 = base). */
-extern const uint8_t backdrop_palettes[BATTLE_BACKDROP_COUNT][4];
+extern uint8_t backdrop_palettes[BATTLE_BACKDROP_COUNT][4];

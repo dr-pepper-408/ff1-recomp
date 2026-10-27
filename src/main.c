@@ -7,6 +7,7 @@
 #include "input.h"
 #include "ppu.h"
 #include "audio.h"
+#include "romdata.h"
 
 /**
  * Global runtime configuration.
@@ -103,13 +104,16 @@ static void run_loop(SDL_Renderer* renderer, SDL_Texture* screen) {
  *
  * @param argc  Argument count.
  * @param argv  Argument vector: --new skips the title screen and starts a
- *              new game.
+ *              new game; --rom <file> is the player's ROM.
  * @return      0 on clean exit, 1 on init failure.
  */
 int main(int argc, char* argv[]) {
     int new_game = 0;
-    for (int i = 1; i < argc; i++)
+    const char* rom_arg = NULL;
+    for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "--new") == 0) new_game = 1;
+        else if (strcmp(argv[i], "--rom") == 0 && i + 1 < argc) rom_arg = argv[++i];
+    }
 
     g_config.scale = DEFAULT_SCALE;
     g_config.fullscreen = DEFAULT_FULLSCREEN;
@@ -152,6 +156,32 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     SDL_SetTextureScaleMode(screen, SDL_SCALEMODE_NEAREST);
+
+    /* The game's data: the player's ROM -- --rom, $FF1_ROM, or a ROM beside
+     * the program (FinalFantasy.nes, ff1.nes). */
+    {
+        const char* base = SDL_GetBasePath();
+        static char p1[1024], p2[1024], p3[1024];
+        snprintf(p1, sizeof(p1), "%sFinalFantasy.nes", base ? base : "");
+        snprintf(p2, sizeof(p2), "%sff1.nes", base ? base : "");
+        snprintf(p3, sizeof(p3), "%s../../FinalFantasy.nes", base ? base : "");
+        const char* const roms[] = { p1, p2, p3, NULL };
+        RomStatus st = RomData_Find(rom_arg, roms);
+        if (st != ROM_OK) {
+            char msg[512];
+            snprintf(msg, sizeof(msg),
+                     "This game needs a ROM of Final Fantasy (USA) for the NES.\n\n%s\n\n"
+                     "Start it with --rom <file>, or put the ROM beside the program as FinalFantasy.nes.",
+                     Rom_StatusText(st));
+            fprintf(stderr, "%s\n", msg);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, WINDOW_TITLE, msg, window);
+            SDL_DestroyTexture(screen);
+            SDL_DestroyRenderer(renderer);
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            return 1;
+        }
+    }
 
     if (OWMap_Init() != 0) {
         fprintf(stderr, "OWMap_Init failed\n");

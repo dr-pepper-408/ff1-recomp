@@ -10,4 +10,4 @@
 #include <stdint.h>
 
 #define SCORE_DATA_SIZE 7584
-extern const uint8_t score_data[];
+

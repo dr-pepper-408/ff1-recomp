@@ -11,4 +11,4 @@
 
 #define SPELL_NAME_COUNT 64
 
-extern const char *const spell_names[SPELL_NAME_COUNT];
+

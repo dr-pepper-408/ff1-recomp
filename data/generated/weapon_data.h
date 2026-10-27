@@ -22,4 +22,4 @@ typedef struct {
     uint8_t palette;       // +7: Palette index
 } WeaponData;
 
-extern const WeaponData weapon_table[WEAPON_COUNT];
+extern WeaponData weapon_table[WEAPON_COUNT];

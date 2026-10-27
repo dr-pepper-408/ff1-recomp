@@ -10,4 +10,4 @@
 #include <stdint.h>
 
 #define TREASURE_DATA_SIZE 256
-extern const uint8_t treasure_data[];
+extern uint8_t treasure_data[256];

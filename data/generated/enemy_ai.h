@@ -21,4 +21,4 @@ typedef struct {
     uint8_t _pad_F;       // +15:  unused
 } EnemyAi;
 
-extern const EnemyAi enemy_ai_table[ENEMY_AI_COUNT];
+extern EnemyAi enemy_ai_table[ENEMY_AI_COUNT];

@@ -25,4 +25,4 @@ typedef struct {
     uint8_t unused;       // +7: Unused
 } MagicData;
 
-extern const MagicData magic_table[MAGIC_TOTAL_COUNT];
+extern MagicData magic_table[MAGIC_TOTAL_COUNT];

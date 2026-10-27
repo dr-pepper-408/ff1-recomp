@@ -9,4 +9,4 @@
 
 #include <stdint.h>
 
-extern const char intro_text_text[];
+

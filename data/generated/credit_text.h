@@ -9,4 +9,4 @@
 
 #include <stdint.h>
 
-extern const char credit_text_text[];
+

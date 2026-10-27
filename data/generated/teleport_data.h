@@ -10,29 +10,29 @@
 #include <stdint.h>
 
 // EntrTele_X
-extern const uint8_t entrtele_x[];
+
 
 // EntrTele_Y
-extern const uint8_t entrtele_y[];
+
 
 // EntrTele_Map
-extern const uint8_t entrtele_map[];
+
 
 // ExitTele_X
-extern const uint8_t exittele_x[];
+
 
 // ExitTele_Y
-extern const uint8_t exittele_y[];
+
 
 // NormTele_X
-extern const uint8_t normtele_x[];
+
 
 // NormTele_Y
-extern const uint8_t normtele_y[];
+
 
 // NormTele_Map
-extern const uint8_t normtele_map[];
+
 
 // Tilesets
-extern const uint8_t tilesets[];
+extern uint8_t tilesets[64];
 

@@ -11,4 +11,4 @@
 
 #define BATTLE_DOMAIN_COUNT 512
 
-extern const uint16_t battle_domain_table[BATTLE_DOMAIN_COUNT];
+extern uint16_t battle_domain_table[BATTLE_DOMAIN_COUNT];

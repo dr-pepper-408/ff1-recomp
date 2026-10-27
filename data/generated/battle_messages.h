@@ -12,7 +12,7 @@
 /* Indexed by BTLMSG id - 1. */
 #define BATTLE_MESSAGE_COUNT 78
 
-extern const char *const battle_message_table[BATTLE_MESSAGE_COUNT];
+extern const char *battle_message_table[BATTLE_MESSAGE_COUNT];
 
 #define BTLMSG_HPUP 0x01
 #define BTLMSG_ASLEEP 0x04
@@ -52,4 +52,4 @@ extern const char *const battle_message_table[BATTLE_MESSAGE_COUNT];
 #define BTLMSG_NOTHINGHAPPENS 0x4E
 
 /* bank_0C lut_MagicBattleMessages: BTLMSG id per attack id (0 = none). */
-extern const uint8_t lut_MagicBattleMessages[92];
+extern uint8_t lut_MagicBattleMessages[92];

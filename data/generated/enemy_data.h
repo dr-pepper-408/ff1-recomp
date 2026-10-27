@@ -31,4 +31,4 @@ typedef struct {
     uint8_t  elem_resist;    // +0x13: Elemental resist bitmask
 } EnemyData;
 
-extern const EnemyData enemy_table[ENEMY_COUNT];
+extern EnemyData enemy_table[ENEMY_COUNT];
