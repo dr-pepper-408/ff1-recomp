@@ -68,7 +68,11 @@ def main():
         raise SystemExit(f"{love_exe} missing: install LÖVE 11.5 or pass --love")
 
     out = os.path.join(PORT, "release", "FF1-x86")
-    shutil.rmtree(out, ignore_errors=True)
+    try:
+        if os.path.exists(out):
+            shutil.rmtree(out)
+    except OSError as e:
+        raise SystemExit(f"can't replace {out} ({e.strerror}): close FF1-x86.exe if it's running")
     os.makedirs(out)
 
     # game.love: the front end, zipped; fused after love.exe
