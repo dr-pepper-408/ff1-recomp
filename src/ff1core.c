@@ -1402,11 +1402,14 @@ FF1_API void ff1_debug_place(int tx, int ty, int vehicle) {
 }
 
 /* For screenshots and testing: start battle `formation` (as FXNEXT_BATTLE
- * does, without the transition), the backdrop of the party's tile. */
+ * does, without the transition), the backdrop of the party's tile (or, in a
+ * standard map, of its entrance). */
 FF1_API void ff1_debug_battle(int formation) {
     Battle_SetRespondRate(g_ctx.respond_rate);
-    Battle_Start(&g_ctx.save, formation,
-                 OWMap_GetTileID(g_ctx.player.tile_x & 0xFF, g_ctx.player.tile_y & 0xFF));
+    /* the backdrop as game.c picks it: in a standard map, the entrance's tile */
+    Battle_Start(&g_ctx.save, formation, g_ctx.mode == MODE_OW
+                 ? OWMap_GetTileID(g_ctx.player.tile_x & 0xFF, g_ctx.player.tile_y & 0xFF)
+                 : OWMap_GetTileID(g_ctx.ow_return_x, g_ctx.ow_return_y));
     g_ctx.state = GS_BATTLE;
 }
 

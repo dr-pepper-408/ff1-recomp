@@ -129,6 +129,7 @@ local battle_cam                           -- this battle's shot (nil between ba
 local force_battlecam                      -- --battlecam=N
 local battle_t0 = 0                        -- when this battle's shot began (its camera move)
 local start_battle                         -- --battle=N
+local battle_wait                          -- (frames before it, after --enter)
 local enter_id                             -- --enter=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
@@ -573,7 +574,10 @@ function love.update(dt)
         for _ = 1, extra do core.ff1_frame(b) end
         core.ff1_frame(b)
         if place then core.ff1_debug_place(place[1], place[2], place[3] or 0); place = nil end
-        if start_battle then core.ff1_debug_battle(start_battle); start_battle = nil end
+        if start_battle then                       -- (with --enter: once the party is in)
+            battle_wait = (battle_wait or (enter_id and 120 or 0)) - 1
+            if battle_wait < 0 then core.ff1_debug_battle(start_battle); start_battle = nil end
+        end
         if enter_id then core.ff1_debug_enter(enter_id); enter_id = nil end
         if inroom_at then
             inroom_at = inroom_at - 1

@@ -1282,6 +1282,18 @@ int Game_Start(GameContext* g) {
 }
 
 void Game_EnterTeleport(GameContext* g, uint8_t entrance_id) {
+    /* Stand on a tile of that entrance first, as stepping on it would: the
+     * battles inside take their backdrop from it (ow_return). */
+    for (int y = 0; g->mode == MODE_OW && y < 256; y++)
+        for (int x = 0; x < 256; x++) {
+            const OWMetatile* m = OWMap_GetMetatile(OWMap_GetTileID((uint8_t)x, (uint8_t)y));
+            if (m && (m->prop1 & 0x80) && (m->prop1 & 0x3F) == entrance_id) {
+                g->player.tile_x = (uint8_t)x;
+                g->player.tile_y = (uint8_t)y;
+                y = 256;
+                break;
+            }
+        }
     transition_begin_entrance(g, entrance_id);
 }
 
