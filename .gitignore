@@ -14,3 +14,7 @@ data/generated/data/
 # Dumps of the game's graphics and map (tools/extract_chr.py, extract_overworld_rle.py): never committed
 data/graphics/
 data/overworld_rle.bin
+
+# ROMs: the game itself, never committed
+*.nes
+*.NES

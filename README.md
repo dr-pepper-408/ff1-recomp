@@ -31,8 +31,13 @@ sound, the minigame, and the ending. See `PLAN.md` (the port),
 - Python 3 (to generate the game data from your ROM)
 - SDL3 is included under `src/SDL3/` (zlib licence)
 - [LÖVE 11.5](https://love2d.org) for the 3D front end
-- A ROM of *Final Fantasy* (USA): the 256 KB after its iNES header must have
-  SHA-1 `c9cfbf5455085e198dce039298b083cd6fc88bce`
+- A ROM of **Final Fantasy (USA)** for the NES, the original 1990 North
+  American release, unmodified (tested with a dump named
+  `Final Fantasy (USA).nes`). The file's 16-byte header may be iNES or
+  NES 2.0, or missing; what is checked is the 256 KB of game data after it,
+  whose SHA-1 must be `c9cfbf5455085e198dce039298b083cd6fc88bce`.
+  Other versions don't work: the Japanese release, the Famicom
+  *Final Fantasy I・II*, the remakes, and translated or hacked ROMs.
 
 For now, generating the data also needs the FF1 disassembly this port was
 written against, in the folder above this one: the extractor takes the
