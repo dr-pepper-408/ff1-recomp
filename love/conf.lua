@@ -2,7 +2,7 @@ function love.conf(t)
     t.identity = "ff1-recomp"
     t.version = "11.5"
     t.console = true
-    t.window.title = "Final Fantasy (LOVE)"
+    t.window.title = "FF1-recomp"
     t.window.width = 768
     t.window.height = 720
     t.window.resizable = true
