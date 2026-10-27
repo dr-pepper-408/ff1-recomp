@@ -287,8 +287,44 @@ end
 
 local SKY = { 0.42, 0.62, 0.95 }
 
+-- Where the save, settings and ROM copy live (data_dir): in a release, the
+-- program's own folder when it can be written to (a portable folder), else
+-- LOVE's save folder.  Read and written with io, as LOVE can only write to
+-- its save folder.
+data_dir = nil
+
+local function read_file(path)
+    local f = io.open(path, "rb")
+    if not f then return nil end
+    local s = f:read("*a")
+    f:close()
+    return s
+end
+
+local function write_file(path, s)
+    local f = io.open(path, "wb")
+    if not f then return false end
+    f:write(s)
+    f:close()
+    return true
+end
+
+local function pick_data_dir(dev)
+    local saves = love.filesystem.getSaveDirectory()
+    if dev then return saves end
+    local base = love.filesystem.getSourceBaseDirectory()
+    if not write_file(base .. "/.write-test", "") then return saves end
+    os.remove(base .. "/.write-test")
+    -- (from an earlier release that kept them in the save folder)
+    for _, name in ipairs({ "ff1.sav", SETTINGS, "rom.nes" }) do
+        local old = read_file(saves .. "/" .. name)
+        if old and not read_file(base .. "/" .. name) then write_file(base .. "/" .. name, old) end
+    end
+    return base
+end
+
 local function save_settings()
-    pcall(love.filesystem.write, SETTINGS,
+    write_file(data_dir .. "/" .. SETTINGS,
           string.format("preset=%d\nview=%d\ntiltshift=%d\nshimmer=%d\ndaynight=%d\nbattlemove=%d\nencounters=%d\nbattlespeed=%d\n",
                         preset_i, view_i, opt.tiltshift and 1 or 0, opt.shimmer and 1 or 0,
                         opt.daynight and 1 or 0, opt.battlemove and 1 or 0, opt.encounters and 1 or 0,
@@ -296,8 +332,8 @@ local function save_settings()
 end
 
 local function load_settings()
-    local ok, text = pcall(love.filesystem.read, SETTINGS)
-    if not ok or not text then return end
+    local text = read_file(data_dir .. "/" .. SETTINGS)
+    if not text then return end
     local p = tonumber(text:match("preset=(%d+)"))
     local v = tonumber(text:match("view=(%d+)"))
     if p and PRESETS[p] then preset_i = p end
@@ -315,7 +351,7 @@ end
 
 -- ---- The ROM ----
 
-ROM_COPY = "rom.nes"               -- the player's ROM, kept in the save folder
+ROM_COPY = "rom.nes"               -- the player's ROM, kept in data_dir
 started = false                    -- the game is running (a ROM was found)
 rom_prompt = nil                   -- asking for the ROM: "" or why the last one failed
 
@@ -353,15 +389,14 @@ function love.filedropped(file)
     file:open("r")
     local data = file:read()
     file:close()
-    love.filesystem.write(ROM_COPY .. ".new", data)
-    local path = love.filesystem.getSaveDirectory() .. "/" .. ROM_COPY .. ".new"
+    local path = data_dir .. "/" .. ROM_COPY .. ".new"
+    write_file(path, data)
     local status = core.ff1_load_rom(path)
+    os.remove(path)
     if status == 0 then
-        love.filesystem.write(ROM_COPY, data)
-        love.filesystem.remove(ROM_COPY .. ".new")
+        write_file(data_dir .. "/" .. ROM_COPY, data)
         start_game()
     else
-        love.filesystem.remove(ROM_COPY .. ".new")
         rom_prompt = ffi.string(core.ff1_rom_message(status))
     end
 end
@@ -389,7 +424,6 @@ local function draw_rom_prompt()
 end
 
 function love.load(args)
-    load_settings()
     local src = love.filesystem.getSource()
     -- The game library: beside the program in a release (fused), else the
     -- development build next to the project.
@@ -398,6 +432,8 @@ function love.load(args)
     local dev = love.filesystem.getInfo ~= nil and io.open(build .. "ff1core.dll", "rb")
     if dev then dev:close() end
     core = ffi.load(dev and (build .. "ff1core.dll") or release)
+    data_dir = pick_data_dir(dev)
+    load_settings()
     local new_game = 0
     for _, a in ipairs(args) do
         if a == "--new" then new_game = 1 end
@@ -440,10 +476,10 @@ function love.load(args)
     -- earlier run, $FF1_ROM, or the development one beside the project;
     -- else the player is asked for it (love.filedropped).
     -- The save: the development build's (shared with the SDL build), or
-    -- the save folder in a release.
-    save_file = dev and (build .. "ff1.sav") or (love.filesystem.getSaveDirectory() .. "/ff1.sav")
+    -- data_dir in a release.
+    save_file = dev and (build .. "ff1.sav") or (data_dir .. "/ff1.sav")
     start_new = new_game
-    local tries = { love.filesystem.getSaveDirectory() .. "/" .. ROM_COPY, os.getenv("FF1_ROM"),
+    local tries = { data_dir .. "/" .. ROM_COPY, os.getenv("FF1_ROM"),
                     src .. "/../../FinalFantasy.nes", src .. "/../FinalFantasy.nes" }
     for _, path in pairs(tries) do
         if ask_rom then break end                  -- (--ask-rom: show the prompt)

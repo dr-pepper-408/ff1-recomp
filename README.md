@@ -64,7 +64,9 @@ python tools/make_release.py       # release/FF1-recomp/ and release/FF1-recomp-
 
 A ready-to-play Windows folder of the LÖVE version (LÖVE fused in, its
 runtime, `ff1core.dll`), with no game data: players run `FF1-recomp.exe` and
-drop their ROM on the window the first time.
+drop their ROM on the window the first time. The release is portable: it
+keeps the ROM's copy, the save and the settings beside `FF1-recomp.exe`
+(or in `%APPDATA%\ff1-recomp` if that folder can't be written to).
 
 ## Run
 

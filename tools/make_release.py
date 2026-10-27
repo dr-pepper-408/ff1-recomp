@@ -33,7 +33,12 @@ Starting
 Run FF1-recomp.exe. The first time, it asks for the ROM: drag the file onto
 the window. It must be Final Fantasy (USA), the original 1990 NES release,
 unmodified (other versions, translations and hacks don't work). It is
-checked and kept in the game's save folder, so you're asked only once.
+checked and kept in this folder as rom.nes, so you're asked only once.
+
+Your game is saved in this folder too (ff1.sav, settings.txt): keep them
+when you update, and don't share the folder with rom.nes in it. If the
+folder can't be written to (e.g. in Program Files), they go to
+%APPDATA%\\ff1-recomp instead.
 
 Keys
 ----
@@ -93,6 +98,10 @@ def main():
     shutil.copy(dll, out)
     open(os.path.join(out, "README.txt"), "w", encoding="utf-8", newline="\r\n").write(PLAYER_README)
 
+    # (the game keeps the player's ROM and save beside the program: never ship them)
+    for name in os.listdir(out):
+        if name.lower().endswith((".nes", ".sav", ".new")) or name == "settings.txt":
+            raise SystemExit(f"{name} in {out}: player data, not for the release")
     archive = os.path.join(PORT, "release", "FF1-recomp-windows")
     shutil.make_archive(archive, "zip", os.path.join(PORT, "release"), "FF1-recomp")
     print(f"wrote {out} and {archive}.zip:")
