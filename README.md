@@ -111,6 +111,9 @@ tests/          unit tests and screenshot scenarios
 
 ## Legal
 
+The code is under the MIT licence (`LICENSE`). SDL3 (`src/SDL3/`) and LÖVE
+keep their own (zlib) licences.
+
 *Final Fantasy* is © Square Enix. This is an unofficial, non-commercial fan
 project, not affiliated with or endorsed by Square Enix. It contains no
 game data; you need your own copy of the game.
