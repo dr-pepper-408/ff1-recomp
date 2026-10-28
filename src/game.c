@@ -268,7 +268,7 @@ static void place_on_map(GameContext* g, int map, int tileset, int x, int y) {
 /** Normal teleport: remember this floor for a later warp, then go to the
  *  destination from lut_NormTele_X/Y/Map. */
 static void normal_teleport(GameContext* g) {
-    if (g->warp_depth < WARP_STACK_MAX) {
+    if (g->mode == MODE_SM && g->warp_depth < WARP_STACK_MAX) {
         MapReturn* r = &g->warp_stack[g->warp_depth++];
         r->map = (uint8_t)SM_GetMapId();
         r->tileset = (uint8_t)SM_GetTileset();
@@ -1281,20 +1281,51 @@ int Game_Start(GameContext* g) {
     return 1;
 }
 
+/* An overworld tile of entrance `id` (0: none found). */
+static int find_entrance(uint8_t id, int* tx, int* ty) {
+    for (int y = 0; y < 256; y++)
+        for (int x = 0; x < 256; x++) {
+            const OWMetatile* m = OWMap_GetMetatile(OWMap_GetTileID((uint8_t)x, (uint8_t)y));
+            if (m && (m->prop1 & 0x80) && (m->prop1 & 0x3F) == id) { *tx = x; *ty = y; return 1; }
+        }
+    return 0;
+}
+
 void Game_EnterTeleport(GameContext* g, uint8_t entrance_id) {
     /* Stand on a tile of that entrance first, as stepping on it would: the
      * battles inside take their backdrop from it (ow_return). */
-    for (int y = 0; g->mode == MODE_OW && y < 256; y++)
-        for (int x = 0; x < 256; x++) {
-            const OWMetatile* m = OWMap_GetMetatile(OWMap_GetTileID((uint8_t)x, (uint8_t)y));
-            if (m && (m->prop1 & 0x80) && (m->prop1 & 0x3F) == entrance_id) {
-                g->player.tile_x = (uint8_t)x;
-                g->player.tile_y = (uint8_t)y;
-                y = 256;
-                break;
-            }
-        }
+    int x, y;
+    if (g->mode == MODE_OW && find_entrance(entrance_id, &x, &y)) {
+        g->player.tile_x = x;
+        g->player.tile_y = y;
+    }
     transition_begin_entrance(g, entrance_id);
+}
+
+int Game_DebugGoto(GameContext* g, int normal, uint8_t id) {
+    if (g->state != GS_WALK) return 0;
+    if (normal) {                      /* (normal_teleport: from the overworld, nothing to warp back to) */
+        if (g->mode == MODE_OW) {
+            g->ow_return_x = g->player.tile_x;
+            g->ow_return_y = g->player.tile_y;
+            g->warp_depth = 0;
+        }
+        g->pending_normal_id = id;
+        begin_fx(g, SCREENFX_WIPE_CLOSE, FXNEXT_NORMAL_TELE);
+        return 1;
+    }
+    int x, y;
+    if (g->mode == MODE_OW || !find_entrance(id, &x, &y)) {
+        Game_EnterTeleport(g, id);
+        return 1;
+    }
+    /* From a standard map: as if from the entrance's overworld tile. */
+    g->pending_teleport_id = id;
+    g->ow_return_x = x;
+    g->ow_return_y = y;
+    g->warp_depth = 0;
+    begin_fx(g, SCREENFX_WIPE_CLOSE, FXNEXT_ENTER_MAP);
+    return 1;
 }
 
 void Game_Shutdown(void) {

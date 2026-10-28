@@ -25,6 +25,8 @@
   --inroom (with --enter: as if through a door, the rooms' insides shown),
   --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
   --nohud (no status lines at the top, for pictures),
+  --tour (every standard map in turn: ] / [ next / previous),
+  --tour-shots (a picture of each map in the save folder's tour/, then quit),
   --classes=A,B,C,D (the party's classes: 0-5, 6-11 after the class change),
   --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
   FILE were dropped on the ROM prompt), --landmark-refs (write
@@ -35,7 +37,7 @@
   functions), settings.lua (where files live, the settings), rom.lua (the
   ROM prompt, starting the game), world3d.lua and battle3d.lua (the 3D
   view), effects.lua (day / night, tilt-shift), shaders.lua, matrix.lua,
-  landmarks.lua (--landmark-refs).
+  landmarks.lua (--landmark-refs), tour.lua (--tour).
 ]]
 
 local ffi = require("ffi")
@@ -47,6 +49,7 @@ local effects = require("effects")
 local world3d = require("world3d")
 local battle3d = require("battle3d")
 local landmarks = require("landmarks")
+local tour = require("tour")
 
 local NES_FRAME = 16639267 / 1e9   -- 60.0988 Hz (config.h NES_FRAME_NS)
 
@@ -89,6 +92,11 @@ function love.load(args)
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then S.view3d = false end
         if a == "--nohud" then no_hud = true end
+        if a == "--tour" then rom.new_game = 1; tour.start(false) end
+        if a == "--tour-shots" then                -- (in daylight; the setting isn't saved)
+            rom.new_game, no_hud, S.opt.daynight = 1, true, false
+            tour.start(true)
+        end
         local cl = a:match("^%-%-classes=([%d,]+)$")
         if cl then set_classes = {}; for c in cl:gmatch("%d+") do set_classes[#set_classes + 1] = tonumber(c) end end
         if a == "--ask-rom" then ask_rom = true end
@@ -202,6 +210,7 @@ function love.update(dt)
             dialogue_at = dialogue_at - 1
             if dialogue_at == 0 then core.ff1_debug_dialogue(dialogue_id); dialogue_at = nil end
         end
+        tour.frame()
         n = n + core.ff1_audio(audio_tmp + n, 8192 - n)
     end
     -- One buffer per update; dropped when the queue is full (the game ran
@@ -254,6 +263,7 @@ function love.keypressed(key)
         S.VIEW = S.VIEWS[S.view_i][2]
         settings.save()
     end
+    tour.keypressed(key)
     if key == "escape" then love.event.quit() end
 end
 
@@ -287,6 +297,8 @@ function love.draw()
     elseif S.view3d and core.ff1_battle3d() == 1 then battle3d.draw()
     else draw2d() end
     if core.ff1_battle3d() ~= 1 then battle3d.leave() end
+    tour.after_draw()
+    tour.draw_label()
     if shot_frames then
         if shot_frames == 60 then shot_t0 = love.timer.getTime() end
         shot_frames = shot_frames - 1

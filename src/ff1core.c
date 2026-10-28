@@ -151,6 +151,43 @@ FF1_API void ff1_debug_class(int i, int cls) {
         g_ctx.save.characters[i].class = (uint8_t)cls;
 }
 
+/* For testing, the location tour: every standard map (61), each reached by
+ * the first entrance or normal teleport leading to it, entrances first. */
+#define TOUR_MAPS 61
+static int tour_n = -1;
+static uint8_t tour[TOUR_MAPS][3];      /* map, normal teleport?, teleport id */
+
+static void tour_build(void) {
+    uint8_t seen[TOUR_MAPS] = { 0 };
+    tour_n = 0;
+    for (int normal = 0; normal < 2; normal++)
+        for (int id = 0; id < (normal ? 64 : 32); id++) {
+            int map, x, y, ts;
+            if (normal) SM_LookupNormal((uint8_t)id, &map, &x, &y, &ts);
+            else SM_LookupEntrance((uint8_t)id, &map, &x, &y, &ts);
+            if (map < 0 || map >= TOUR_MAPS || seen[map] || (x == 0 && y == 0)) continue;
+            seen[map] = 1;
+            tour[tour_n][0] = (uint8_t)map;
+            tour[tour_n][1] = (uint8_t)normal;
+            tour[tour_n][2] = (uint8_t)id;
+            tour_n++;
+        }
+}
+
+FF1_API int ff1_tour_count(void) {
+    if (tour_n < 0) tour_build();
+    return tour_n;
+}
+
+/* Go to stop `i` of the tour (info: its map, 1 for a normal teleport, the
+ * teleport id); 0: not now (the party isn't walking). */
+FF1_API int ff1_tour_go(int i, int* info) {
+    if (tour_n < 0) tour_build();
+    if (i < 0 || i >= tour_n) return 0;
+    info[0] = tour[i][0]; info[1] = tour[i][1]; info[2] = tour[i][2];
+    return Game_DebugGoto(&g_ctx, tour[i][1], tour[i][2]);
+}
+
 /* Random encounters on or off (an option, not in the original). */
 FF1_API void ff1_set_encounters(int on) {
     Game_SetRandomEncounters(on);

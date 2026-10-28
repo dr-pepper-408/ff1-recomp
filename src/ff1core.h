@@ -152,6 +152,14 @@ FF1_API void ff1_debug_dialogue(int id);
 /** For screenshots and testing: character `i`'s class (6-11: promoted). */
 FF1_API void ff1_debug_class(int i, int cls);
 
+/** For testing, the location tour: how many stops (one per standard map). */
+FF1_API int ff1_tour_count(void);
+
+/** Go to stop `i` of the tour, through the usual wipe; info[0..2]: its map,
+ *  1 if by normal teleport (else an entrance), the teleport id.  0: not now
+ *  (the party isn't walking). */
+FF1_API int ff1_tour_go(int i, int* info);
+
 /** Random encounters on (as the original) or off; fixed battles still happen. */
 FF1_API void ff1_set_encounters(int on);
 

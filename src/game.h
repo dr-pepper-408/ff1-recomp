@@ -161,6 +161,11 @@ void Game_Shutdown(void);
  *  stepped on its tile: wipe closed, load the map, wipe open. */
 void Game_EnterTeleport(GameContext* g, uint8_t entrance_id);
 
+/** For testing (the location tour): go to entrance `id`, or normal teleport
+ *  `id` if `normal`, from wherever the party is walking, through the usual
+ *  wipe.  0: not now (not walking). */
+int Game_DebugGoto(GameContext* g, int normal, uint8_t id);
+
 /** Advance the game by one NES frame.  No rendering happens here. */
 void Game_Update(GameContext* g, const InputState* input);
 
