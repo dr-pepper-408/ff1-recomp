@@ -36,6 +36,7 @@ void ff1_debug_dialogue(int id);
 void ff1_debug_class(int i, int cls);
 void ff1_debug_level(int level);
 void ff1_debug_kit(int stage);
+int ff1_debug_teleport(int id);
 void ff1_debug_autopilot(int on, const int* attack, const int* heal);
 int ff1_tour_count(void);
 int ff1_tour_go(int i, int* info);

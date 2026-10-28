@@ -22,6 +22,7 @@
   1-4; 5 the boss's), --frames=N (when --shot
   captures), --auto (tap A every 16 frames: fight through menus),
   --enter=N (go through overworld entrance N: 1 Coneria, 2 Pravoka...),
+  --teleport=N (take normal teleport N: a dungeon's floors; see --tour),
   --inroom (with --enter: as if through a door, the rooms' insides shown),
   --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
   --nohud (no status lines at the top, for pictures),
@@ -75,6 +76,7 @@ local set_level                            -- --level=N
 local set_kit                              -- --kit=N
 local pilot                                -- --cast / --heal: { attack = {..}, heal = {..} }
 local enter_id                             -- --enter=N
+local teleport_id                          -- --teleport=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
 local refs_at                              -- --landmark-refs: frames until they're written
@@ -149,6 +151,8 @@ function love.load(args)
         if x then place = place or {}; place[1], place[2] = tonumber(x), tonumber(y) end
         local v = a:match("^%-%-vehicle=(%d+)$")
         if v then place = place or {}; place[3] = tonumber(v) end
+        local tp = a:match("^%-%-teleport=(%w+)$")
+        if tp then teleport_id = tonumber(tp) end
         local en = a:match("^%-%-enter=(%w+)$")
         if en then enter_id = tonumber(en) end
         local bc = a:match("^%-%-battlecam=(%d)$")
@@ -252,6 +256,7 @@ function love.update(dt)
             if battle_wait < 0 then core.ff1_debug_battle(start_battle); start_battle = nil end
         end
         if enter_id then core.ff1_debug_enter(enter_id); enter_id = nil end
+        if teleport_id and core.ff1_debug_teleport(teleport_id) ~= 0 then teleport_id = nil end   -- (once walking)
         if inroom_at then
             inroom_at = inroom_at - 1
             if inroom_at == 0 then core.ff1_debug_inroom(); inroom_at = nil end

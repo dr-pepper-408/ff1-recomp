@@ -171,6 +171,12 @@ FF1_API void ff1_debug_level(int level) {
     }
 }
 
+/* For screenshots and testing: take normal teleport `id` (stairs, a
+ * dungeon's floors) from wherever the party is walking; 0: not now. */
+FF1_API int ff1_debug_teleport(int id) {
+    return Game_DebugGoto(&g_ctx, 1, (uint8_t)id);
+}
+
 /* For pictures: stage 1-5's equipment and spells (Party_DebugKit). */
 FF1_API void ff1_debug_kit(int stage) {
     Party_DebugKit(&g_ctx.save, stage);

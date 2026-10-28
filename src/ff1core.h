@@ -156,6 +156,10 @@ FF1_API void ff1_debug_class(int i, int cls);
  *  battles' EXP would; HP and spell charges full. */
 FF1_API void ff1_debug_level(int level);
 
+/** For screenshots and testing: take normal teleport `id` (stairs: a
+ *  dungeon's floors), through the usual wipe.  0: not now (not walking). */
+FF1_API int ff1_debug_teleport(int id);
+
 /** For pictures: equipment and spells for stage 1-5 of the journey (the
  *  Lich, Kary, Kraken, Tiamat, Chaos), by each character's class. */
 FF1_API void ff1_debug_kit(int stage);
