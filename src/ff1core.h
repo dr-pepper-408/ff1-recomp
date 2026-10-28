@@ -57,7 +57,7 @@ FF1_API int ff1_view3d(void);
 
 /** The frame's screen effects (valid after ff1_draw), for the 3D view to
  *  apply its own way: visible rows, emphasis tint, monochrome, shake (see
- *  ff1core.c for the 12 values). */
+ *  view3d_world.c for the 12 values). */
 FF1_API void ff1_view3d_fx(float* out);
 
 /** What of a picture from ff1_draw goes over the 3D view (the dialogue

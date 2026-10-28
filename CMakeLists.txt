@@ -81,7 +81,7 @@ target_link_libraries(ff1-recomp
 # SDL files, plus ff1core.c.
 set(CORE_SOURCES ${SOURCES})
 list(REMOVE_ITEM CORE_SOURCES src/main.c src/audio.c src/input.c)
-add_library(ff1core SHARED ${CORE_SOURCES} src/ff1core.c)
+add_library(ff1core SHARED ${CORE_SOURCES} src/ff1core.c src/view3d_world.c src/view3d_battle.c)
 set_target_properties(ff1core PROPERTIES PREFIX "")
 if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(ff1core PRIVATE -Wall -Wextra)
