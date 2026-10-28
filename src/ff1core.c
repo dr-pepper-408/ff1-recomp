@@ -16,6 +16,7 @@
 #include "romdata.h"
 #include "game.h"
 #include "battle.h"
+#include "btl_core.h"
 #include "text.h"
 #include "sm_map.h"
 #include "render_sm.h"
@@ -27,6 +28,7 @@
 #include "../data/generated/palette_data.h"
 #include "../data/generated/menu_data.h"
 #include "../data/generated/battle_ui.h"
+#include "../data/generated/level_up_data.h"
 
 #define SAMPLE_RATE 44100
 
@@ -149,6 +151,23 @@ FF1_API void ff1_debug_dialogue(int id) {
 FF1_API void ff1_debug_class(int i, int cls) {
     if (i >= 0 && i < MAX_PARTY_SIZE && cls >= 0 && cls < 12)
         g_ctx.save.characters[i].class = (uint8_t)cls;
+}
+
+/* For screenshots and testing: the party raised to level `level` (1-based),
+ * a level at a time as battles' EXP would (LvlUp_LevelUp: its stat
+ * growth and random rolls); then HP and spell charges full. */
+FF1_API void ff1_debug_level(int level) {
+    SaveData* s = &g_ctx.save;
+    for (int i = 0; i < MAX_PARTY_SIZE; i++) {
+        CharacterStats* c = &s->characters[i];
+        BtlLevelUp up;
+        while (c->level + 1 < level && c->level < 49) {
+            uint32_t e = c->exp[0] | ((uint32_t)c->exp[1] << 8) | ((uint32_t)c->exp[2] << 16);
+            Btl_AwardExp(s, i, lut_ExpToAdvance[c->level] - e, &up);
+        }
+        c->cur_hp = c->max_hp;
+        for (int l = 0; l < 8; l++) s->character_magic[i].cur_mp[l] = s->character_magic[i].max_mp[l];
+    }
 }
 
 /* For testing, the location tour: every standard map (61), each reached by

@@ -34,6 +34,7 @@ function E.time_of_day()
 end
 
 local scene_canvas, blur_canvas, blur_shader
+E.target = nil                     -- where the frame goes (nil: the window; --record: its canvas)
 
 function E.load()
     blur_shader = love.graphics.newShader(shaders.BLUR)
@@ -54,13 +55,13 @@ end
 
 -- ...then drawn to the screen through the two blur passes.
 function E.end_tilt_shift(w, h)
-    love.graphics.setCanvas()
+    love.graphics.setCanvas(E.target)
     love.graphics.setCanvas(blur_canvas)
     love.graphics.setShader(blur_shader)
     blur_shader:send("strength", 1)
     blur_shader:send("dir", { 1 / w, 0 })
     love.graphics.draw(scene_canvas)
-    love.graphics.setCanvas()
+    love.graphics.setCanvas(E.target)
     blur_shader:send("dir", { 0, 1 / h })
     love.graphics.draw(blur_canvas)
     love.graphics.setShader()

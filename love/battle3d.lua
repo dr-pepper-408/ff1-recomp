@@ -177,6 +177,9 @@ function B.draw()
         local p = matrix.perspective(math.rad(BATTLE_FOV), w / h, 4, 3000)
         p[1][3] = -STAGE_NDC_X                     -- (off-centre: x' = x + s * w)
         p[2][3] = -STAGE_NDC_Y
+        if love.graphics.getCanvas() then          -- (an image is drawn upside down: flip y back)
+            for k = 1, 4 do p[2][k] = -p[2][k] end
+        end
         love.graphics.setShader(shader)
         shader:send("proj", "row", p)
         shader:send("view", "row", matrix.look_at(ex, ey, ez, tx, ty, tz))

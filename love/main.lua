@@ -27,7 +27,12 @@
   --nohud (no status lines at the top, for pictures),
   --tour (every standard map in turn: ] / [ next / previous),
   --tour-shots (a picture of each map in the save folder's tour/, then quit),
+  --record=NAME (a 1024 x 960 video, videos/NAME.mp4; --rec-frames=N long,
+  --rec-size=WxH, --rec-skip=N frames not kept first),
+  --walk=U32,W60,R16,A1... (buttons held for N frames: U D L R A B, W waits),
+  --spin=DEG (the map camera turns DEG degrees a second),
   --classes=A,B,C,D (the party's classes: 0-5, 6-11 after the class change),
+  --level=N (the party raised to level N, as battles' EXP would),
   --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
   FILE were dropped on the ROM prompt), --landmark-refs (write
   reference pictures of the overworld's landmarks to the save folder's
@@ -50,6 +55,7 @@ local world3d = require("world3d")
 local battle3d = require("battle3d")
 local landmarks = require("landmarks")
 local tour = require("tour")
+local record = require("record")
 
 local NES_FRAME = 16639267 / 1e9   -- 60.0988 Hz (config.h NES_FRAME_NS)
 
@@ -61,6 +67,7 @@ local start_battle                         -- --battle=N
 local battle_wait                          -- (frames before it, after --enter)
 local no_hud                               -- --nohud: no status lines (for pictures)
 local set_classes                          -- --classes=A,B,C,D
+local set_level                            -- --level=N
 local enter_id                             -- --enter=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
@@ -69,6 +76,8 @@ local shot_frames                          -- --shot: capture the screen, then q
 local place                                -- --at=X,Y
 local shot_t0
 local auto_a                               -- --auto: tap A every 16 frames
+local walk                                 -- --walk: { button, frames } still to press
+local spin                                 -- --spin: degrees a second
 
 function love.load(args)
     local src = love.filesystem.getSource()
@@ -92,11 +101,28 @@ function love.load(args)
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then S.view3d = false end
         if a == "--nohud" then no_hud = true end
+        local rn = a:match("^%-%-record=([%w_%-]+)$")
+        if rn then record.start(rn); no_hud = true end
+        local rf = a:match("^%-%-rec%-frames=(%d+)$")
+        if rf then record.frames = tonumber(rf) end
+        local rs = a:match("^%-%-rec%-skip=(%d+)$")
+        if rs then record.skip = tonumber(rs) end
+        local rw, rh = a:match("^%-%-rec%-size=(%d+)x(%d+)$")
+        if rw then record.W, record.H = tonumber(rw), tonumber(rh) end
+        local wk = a:match("^%-%-walk=([%w,]+)$")
+        if wk then
+            walk = {}
+            for b, f in wk:gmatch("(%a)(%d+)") do walk[#walk + 1] = { b:upper(), tonumber(f) } end
+        end
+        local sp = a:match("^%-%-spin=(%-?[%d%.]+)$")
+        if sp then spin = math.rad(tonumber(sp)) end
         if a == "--tour" then rom.new_game = 1; tour.start(false) end
         if a == "--tour-shots" then                -- (in daylight; the setting isn't saved)
             rom.new_game, no_hud, S.opt.daynight = 1, true, false
             tour.start(true)
         end
+        local lv = a:match("^%-%-level=(%d+)$")
+        if lv then set_level = tonumber(lv) end
         local cl = a:match("^%-%-classes=([%d,]+)$")
         if cl then set_classes = {}; for c in cl:gmatch("%d+") do set_classes[#set_classes + 1] = tonumber(c) end end
         if a == "--ask-rom" then ask_rom = true end
@@ -149,6 +175,7 @@ function love.load(args)
     world3d.load()
     battle3d.load()
     effects.load()
+    record.load()
 
     source = love.audio.newQueueableSource(44100, 16, 1, 8)
     audio_tmp = ffi.new("int16_t[8192]")
@@ -168,6 +195,13 @@ local function buttons()
     if k("x", "backspace") then b = b + 0x20 end
     if k("tab", "rshift") then b = b + 0x40 end
     if k("return", "kpenter") then b = b + 0x80 end
+    if walk and walk[1] then                     -- (--walk: the script's button, held)
+        local step = walk[1]
+        local bits = { U = 0x08, D = 0x04, L = 0x02, R = 0x01, A = 0x10, B = 0x20, W = 0 }
+        b = b + (bits[step[1]] or 0)
+        step[2] = step[2] - 1
+        if step[2] <= 0 then table.remove(walk, 1) end
+    end
     if auto_a then
         auto_a = auto_a + 1
         if auto_a % 16 < 2 then b = b + 0x10 end
@@ -178,7 +212,7 @@ end
 function love.update(dt)
     if not S.started then return end
     local core = S.core
-    acc = math.min(acc + dt, NES_FRAME * 4)
+    acc = record.on and NES_FRAME or math.min(acc + dt, NES_FRAME * 4)   -- (--record: one frame a picture)
     local n = 0
     while acc >= NES_FRAME do
         acc = acc - NES_FRAME
@@ -193,6 +227,7 @@ function love.update(dt)
             for i, c in ipairs(set_classes) do core.ff1_debug_class(i - 1, c) end
             set_classes = nil
         end
+        if set_level then core.ff1_debug_level(set_level); set_level = nil end   -- (after --classes)
         if start_battle then                       -- (with --enter: once the party is in)
             battle_wait = (battle_wait or (enter_id and 120 or 0)) - 1
             if battle_wait < 0 then core.ff1_debug_battle(start_battle); start_battle = nil end
@@ -211,7 +246,9 @@ function love.update(dt)
             if dialogue_at == 0 then core.ff1_debug_dialogue(dialogue_id); dialogue_at = nil end
         end
         tour.frame()
-        n = n + core.ff1_audio(audio_tmp + n, 8192 - n)
+        local got = core.ff1_audio(audio_tmp + n, 8192 - n)
+        record.audio(audio_tmp + n, got)
+        n = n + got
     end
     -- One buffer per update; dropped when the queue is full (the game ran
     -- ahead of the device), as audio.c does.
@@ -222,6 +259,7 @@ function love.update(dt)
         source:play()
     end
 
+    if spin then S.yaw = S.yaw + spin * (record.on and NES_FRAME or dt) end
     if love.keyboard.isDown("q") then S.yaw = S.yaw - dt * 1.5 end   -- (the map's camera only)
     if love.keyboard.isDown("e") then S.yaw = S.yaw + dt * 1.5 end
     if love.keyboard.isDown("pageup") then S.zoom = math.max(0.4, S.zoom - dt * 0.8) end
@@ -291,6 +329,7 @@ function love.draw()
         return
     end
     local core = S.core
+    record.begin_draw()
     core.ff1_draw(ffi.cast("uint8_t*", S.screen_data:getFFIPointer()))
     S.screen:replacePixels(S.screen_data)
     if S.view3d and core.ff1_view3d() == 1 then world3d.draw()
@@ -299,6 +338,7 @@ function love.draw()
     if core.ff1_battle3d() ~= 1 then battle3d.leave() end
     tour.after_draw()
     tour.draw_label()
+    record.end_draw()
     if shot_frames then
         if shot_frames == 60 then shot_t0 = love.timer.getTime() end
         shot_frames = shot_frames - 1

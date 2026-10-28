@@ -152,6 +152,10 @@ FF1_API void ff1_debug_dialogue(int id);
 /** For screenshots and testing: character `i`'s class (6-11: promoted). */
 FF1_API void ff1_debug_class(int i, int cls);
 
+/** For screenshots and testing: the party raised to `level` (1-based), as
+ *  battles' EXP would; HP and spell charges full. */
+FF1_API void ff1_debug_level(int level);
+
 /** For testing, the location tour: how many stops (one per standard map). */
 FF1_API int ff1_tour_count(void);
 

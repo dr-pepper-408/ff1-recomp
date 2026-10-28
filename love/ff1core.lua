@@ -34,6 +34,7 @@ void ff1_debug_enter(int id);
 void ff1_debug_inroom(void);
 void ff1_debug_dialogue(int id);
 void ff1_debug_class(int i, int cls);
+void ff1_debug_level(int level);
 int ff1_tour_count(void);
 int ff1_tour_go(int i, int* info);
 int ff1_landmark_count(void);
