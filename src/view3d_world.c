@@ -738,8 +738,9 @@ static void top_px(uint8_t id, float* u, float* v) {
 }
 
 /* The floor under an object's card at tile (tc, tr): the nearest plain
- * floor tile (walkable, not an object or a box), the one in front first;
- * -1: none near. */
+ * floor tile (walkable, not an object or a box, nothing special: no
+ * stairs or exit, door, chest, altar...), the one in front first; -1:
+ * none near. */
 static int prop_floor(int tc, int tr) {
     static const int8_t near[][2] = { { 0, 1 }, { -1, 0 }, { 1, 0 }, { 0, -1 },
                                       { -1, 1 }, { 1, 1 }, { -1, -1 }, { 1, -1 } };
@@ -747,7 +748,12 @@ static int prop_floor(int tc, int tr) {
         for (int k = 0; k < 8; k++) {
             uint8_t id = world_tile(tc + near[k][0] * r, tr + near[k][1] * r) & 0x7F;
             const OWMetatile* m = world_metatile(id);
-            if (m && !(m->prop0 & 0x01) && !tile_prop[id] && !tile_vol[id]) return id;
+            if (!m || (m->prop0 & 0x01) || tile_prop[id] || tile_vol[id]) continue;
+            int spec = m->prop0 & SM_TP_SPEC_MASK;
+            if ((m->prop0 & SM_TP_TELE_MASK) ||
+                (spec && spec != SM_TP_SPEC_BATTLE && spec != SM_TP_SPEC_DAMAGE && spec != SM_TP_SPEC_CLOSEROOM))
+                continue;
+            return id;
         }
     return -1;
 }
