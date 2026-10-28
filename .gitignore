@@ -24,3 +24,6 @@ release/
 
 # Screenshot scenarios' output (build/ff1-screenshots shots)
 shots/
+
+# Recorded videos (love --record)
+video/
