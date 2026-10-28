@@ -701,6 +701,57 @@ static int vol_tile(int tc, int tr) {
     return tile_vol[world_tile(tc, tr) & 0x7F];
 }
 
+/* A tile drawn mostly in white or a pale colour ($2x, $3x): its own art
+ * would glare as a box's top. */
+static int pale_tile(uint8_t id) {
+    int n[4] = { 0 }, best = 1;
+    for (int y = 0; y < 16; y++)
+        for (int x = 0; x < 16; x++) n[tile_ci[id][y][x]]++;
+    for (int ci = 2; ci < 4; ci++) if (n[ci] > n[best]) best = ci;
+    uint8_t c = tile_colour(id, best);
+    return (c & 0x30) >= 0x20 && (c & 0x0F) < 0x0D;
+}
+
+/* A box's top (the facade's material): a pixel of the tile's commonest
+ * colour that isn't white or pale ($2x, $3x) or black, so the tops don't
+ * glare; else of its darkest colour but black. */
+static void top_px(uint8_t id, float* u, float* v) {
+    int n[4] = { 0 }, at[4][2] = { { 0 } };
+    for (int y = 0; y < 16; y++)
+        for (int x = 0; x < 16; x++) {
+            int ci = tile_ci[id][y][x];
+            n[ci]++;
+            at[ci][0] = x; at[ci][1] = y;
+        }
+    int best = -1, dark = -1;
+    for (int ci = 1; ci < 4; ci++) {
+        uint8_t c = tile_colour(id, ci);
+        if (!n[ci] || (c & 0x0F) >= 0x0D) continue;               /* (black) */
+        if (dark < 0 || (c & 0x30) < (tile_colour(id, dark) & 0x30)) dark = ci;
+        if ((c & 0x30) >= 0x20) continue;                        /* (white, pale) */
+        if (best < 0 || n[ci] > n[best]) best = ci;
+    }
+    if (best < 0) best = dark;
+    int px = best >= 0 ? at[best][0] : rock_px[id][0], py = best >= 0 ? at[best][1] : rock_px[id][1];
+    *u = (float)((id % 16) * 16 + px) + 0.5f;
+    *v = (float)((id / 16) * 16 + py) + 0.5f;
+}
+
+/* The floor under an object's card at tile (tc, tr): the nearest plain
+ * floor tile (walkable, not an object or a box), the one in front first;
+ * -1: none near. */
+static int prop_floor(int tc, int tr) {
+    static const int8_t near[][2] = { { 0, 1 }, { -1, 0 }, { 1, 0 }, { 0, -1 },
+                                      { -1, 1 }, { 1, 1 }, { -1, -1 }, { 1, -1 } };
+    for (int r = 1; r <= 3; r++)
+        for (int k = 0; k < 8; k++) {
+            uint8_t id = world_tile(tc + near[k][0] * r, tr + near[k][1] * r) & 0x7F;
+            const OWMetatile* m = world_metatile(id);
+            if (m && !(m->prop0 & 0x01) && !tile_prop[id] && !tile_vol[id]) return id;
+        }
+    return -1;
+}
+
 /* The chunk's tiles (and a border of one): the box's height in tiles (0:
  * not a volume) and the tile row of its run's facade bottom. */
 static int8_t vt_tiles[18][18];
@@ -788,8 +839,9 @@ FF1_API int ff1_chunk(int cx, int cz, Ff1Vertex* out, int max) {
                         float u = (float)((id % 16) * 16), v = (float)((id / 16) * 16);
                         float X0 = (float)(x0 + bx), Z0 = (float)(z0 + bz);
                         const float p[4][3] = { { X0, h, Z0 }, { X0 + 16, h, Z0 }, { X0 + 16, h, Z0 + 16 }, { X0, h, Z0 + 16 } };
-                        if (w_sm && VB(bx, bz) - tr < VT(bx, bz)) {   /* (overworld art is a top view) */
-                            float mu = u + rock_px[id][0] + 0.5f, mv = v + rock_px[id][1] + 0.5f;
+                        if (w_sm && (VB(bx, bz) - tr < VT(bx, bz) || pale_tile(id))) {   /* (overworld art is a top view) */
+                            float mu, mv;
+                            top_px(id, &mu, &mv);
                             const float uv[4][2] = { { mu, mv }, { mu, mv }, { mu, mv }, { mu, mv } };
                             emit_quad(&e, p, uv, 225);         /* (stone, not glare) */
                         } else {
@@ -800,13 +852,23 @@ FF1_API int ff1_chunk(int cx, int cz, Ff1Vertex* out, int max) {
                         continue;
                     }
                     uint8_t tid = world_tile(cx * 16 + ti, cz * 16 + tj) & 0x7F;
-                    if (w_sm && tile_prop[tid] && ground_u >= 0) {
-                        /* An object's tile: plain floor (its card stands on it). */
+                    int fl = w_sm && tile_prop[tid] ? prop_floor(cx * 16 + ti, cz * 16 + tj) : -1;
+                    if (fl >= 0 || (w_sm && tile_prop[tid] && ground_u >= 0)) {
+                        /* An object's tile: the floor next to it (its card
+                         * stands on it); else plain floor colour. */
                         memset(done, 1, sizeof(done));
-                        float X0 = (float)(x0 + bx), Z0 = (float)(z0 + bz), u = ground_u + 0.5f, v = ground_v + 0.5f;
+                        float X0 = (float)(x0 + bx), Z0 = (float)(z0 + bz);
                         const float p[4][3] = { { X0, h, Z0 }, { X0 + 16, h, Z0 }, { X0 + 16, h, Z0 + 16 }, { X0, h, Z0 + 16 } };
-                        const float uv[4][2] = { { u, v }, { u, v }, { u, v }, { u, v } };
-                        emit_quad(&e, p, uv, 255);
+                        if (fl >= 0) {
+                            float u = (float)((fl % 16) * 16), v = (float)((fl / 16) * 16);
+                            const float uv[4][2] = { { u + UV_IN, v + UV_IN }, { u + 16 - UV_IN, v + UV_IN },
+                                                     { u + 16 - UV_IN, v + 16 - UV_IN }, { u + UV_IN, v + 16 - UV_IN } };
+                            emit_quad(&e, p, uv, 255);
+                        } else {
+                            float u = ground_u + 0.5f, v = ground_v + 0.5f;
+                            const float uv[4][2] = { { u, v }, { u, v }, { u, v }, { u, v } };
+                            emit_quad(&e, p, uv, 255);
+                        }
                         continue;
                     }
                     int32_t top = tbuf[bz + py + 1][bx + px + 1];
@@ -819,6 +881,14 @@ FF1_API int ff1_chunk(int cx, int cz, Ff1Vertex* out, int max) {
                         for (int a = 0; a < d; a++) done[py + a][px] = 1;
                         float u, v;
                         atlas_uv(x0 + bx + px, top, &u, &v);
+                        if (w_sm) {                    /* (no white or pale tops on a map) */
+                            uint8_t tid2 = tile_at((x0 + bx + px) & WMASK, top & WMASK);
+                            uint8_t col = tile_colour(tid2, ci_at(x0 + bx + px, top));
+                            if ((col & 0x30) >= 0x20 && (col & 0x0F) < 0x0D) {
+                                top_px(tid2, &u, &v);
+                                u -= 0.5f; v -= 0.5f;
+                            }
+                        }
                         float X0 = (float)(x0 + bx + px), X1 = X0 + 1, Z0 = (float)(z0 + bz + py), Z1 = Z0 + d;
                         const float p[4][3] = { { X0, h, Z0 }, { X1, h, Z0 }, { X1, h, Z1 }, { X0, h, Z1 } };
                         const float uv[4][2] = { { u + UV_IN, v + 0.5f }, { u + 1 - UV_IN, v + 0.5f },
@@ -839,6 +909,16 @@ FF1_API int ff1_chunk(int cx, int cz, Ff1Vertex* out, int max) {
                     atlas_uv(x0 + bx + px, z0 + bz + py, &u, &v);
                     float X0 = (float)(x0 + bx + px), X1 = X0 + w, Z0 = (float)(z0 + bz + py), Z1 = Z0 + d;
                     const float p[4][3] = { { X0, h, Z0 }, { X1, h, Z0 }, { X1, h, Z1 }, { X0, h, Z1 } };
+                    const OWMetatile* tm = world_metatile(tid);
+                    if (w_sm && tm && (tm->prop0 & 0x01) && tile_shape[tid] != SH_OCEAN && pale_tile(tid)) {
+                        /* A wall drawn flat in white or pale colours: its
+                         * material instead (no glaring tops). */
+                        float mu, mv;
+                        top_px(tid, &mu, &mv);
+                        const float uv[4][2] = { { mu, mv }, { mu, mv }, { mu, mv }, { mu, mv } };
+                        emit_quad(&e, p, uv, 225);
+                        continue;
+                    }
                     const float uv[4][2] = { { u + UV_IN, v + UV_IN }, { u + w - UV_IN, v + UV_IN },
                                              { u + w - UV_IN, v + d - UV_IN }, { u + UV_IN, v + d - UV_IN } };
                     emit_quad(&e, p, uv, 255);
