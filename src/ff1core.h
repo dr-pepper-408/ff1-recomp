@@ -156,6 +156,15 @@ FF1_API void ff1_debug_class(int i, int cls);
  *  battles' EXP would; HP and spell charges full. */
 FF1_API void ff1_debug_level(int level);
 
+/** For pictures: equipment and spells for stage 1-5 of the journey (the
+ *  Lich, Kary, Kraken, Tiamat, Chaos), by each character's class. */
+FF1_API void ff1_debug_kit(int stage);
+
+/** For pictures: when `on`, battle commands are chosen for the party --
+ *  heal[i] on the most hurt ally under half HP, else attack[i] while it has
+ *  charges, else FIGHT (spell ids, -1 none). */
+FF1_API void ff1_debug_autopilot(int on, const int* attack, const int* heal);
+
 /** For testing, the location tour: how many stops (one per standard map). */
 FF1_API int ff1_tour_count(void);
 

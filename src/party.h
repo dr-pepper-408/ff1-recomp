@@ -90,3 +90,7 @@ void Party_SortEquipment(SaveData* s, int armor);
 /** Debug loadout: seed a level-10 party with items, equipment, magic and gold
  *  (see FF1_DEBUG_STATE in config.h).  Called right after Party_Init(). */
 void Party_ApplyDebug(SaveData* s);
+
+/** For pictures: equipment and spells for stage 1-5 of the journey (the
+ *  Lich, Kary, Kraken, Tiamat, Chaos), by each character's class. */
+void Party_DebugKit(SaveData* s, int stage);

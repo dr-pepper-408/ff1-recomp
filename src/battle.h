@@ -50,6 +50,12 @@ int Battle_WaitingForInput(void);
  *  battles use from the next one on.  0 is the original's default. */
 void Battle_SetRespondRate(int rate);
 
+/** For pictures and testing (not in the original): when `on`, character
+ *  i's commands are chosen for them -- heal[i] (a spell id, -1 none) on the
+ *  most hurt ally under half HP, else attack[i] while it has charges, else
+ *  FIGHT. */
+void Battle_SetAutopilot(int on, const int8_t attack[4], const int8_t heal[4]);
+
 /** Render the battle screen. */
 void Battle_Draw(const SaveData* save);
 

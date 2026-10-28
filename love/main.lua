@@ -33,6 +33,10 @@
   --spin=DEG (the map camera turns DEG degrees a second),
   --classes=A,B,C,D (the party's classes: 0-5, 6-11 after the class change),
   --level=N (the party raised to level N, as battles' EXP would),
+  --kit=N (stage N's equipment and spells: 1 Lich ... 5 Chaos),
+  --cast=A,B,C,D / --heal=A,B,C,D (battle commands chosen for the party:
+  each one's healing spell on an ally under half HP, else its attack
+  spell, else FIGHT; spell ids, -1 none),
   --ask-rom (ask for the ROM even if one is found), --drop=FILE (as if
   FILE were dropped on the ROM prompt), --landmark-refs (write
   reference pictures of the overworld's landmarks to the save folder's
@@ -68,6 +72,8 @@ local battle_wait                          -- (frames before it, after --enter)
 local no_hud                               -- --nohud: no status lines (for pictures)
 local set_classes                          -- --classes=A,B,C,D
 local set_level                            -- --level=N
+local set_kit                              -- --kit=N
+local pilot                                -- --cast / --heal: { attack = {..}, heal = {..} }
 local enter_id                             -- --enter=N
 local inroom_at                            -- --inroom: frames until the party is "in a room"
 local dialogue_at, dialogue_id             -- --dialogue=N
@@ -120,6 +126,14 @@ function love.load(args)
         if a == "--tour-shots" then                -- (in daylight; the setting isn't saved)
             rom.new_game, no_hud, S.opt.daynight = 1, true, false
             tour.start(true)
+        end
+        local kt = a:match("^%-%-kit=(%d)$")
+        if kt then set_kit = tonumber(kt) end
+        local ck, cl4 = a:match("^%-%-(%a+)=(%-?%d+,%-?%d+,%-?%d+,%-?%d+)$")
+        if ck == "cast" or ck == "heal" then
+            pilot = pilot or { cast = { -1, -1, -1, -1 }, heal = { -1, -1, -1, -1 } }
+            local k = 0
+            for v in cl4:gmatch("%-?%d+") do k = k + 1; pilot[ck][k] = tonumber(v) end
         end
         local lv = a:match("^%-%-level=(%d+)$")
         if lv then set_level = tonumber(lv) end
@@ -228,6 +242,11 @@ function love.update(dt)
             set_classes = nil
         end
         if set_level then core.ff1_debug_level(set_level); set_level = nil end   -- (after --classes)
+        if set_kit then core.ff1_debug_kit(set_kit); set_kit = nil end          -- (after --level)
+        if pilot then
+            core.ff1_debug_autopilot(1, ffi.new("int[4]", pilot.cast), ffi.new("int[4]", pilot.heal))
+            pilot = nil
+        end
         if start_battle then                       -- (with --enter: once the party is in)
             battle_wait = (battle_wait or (enter_id and 120 or 0)) - 1
             if battle_wait < 0 then core.ff1_debug_battle(start_battle); start_battle = nil end

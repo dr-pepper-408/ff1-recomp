@@ -1819,6 +1819,49 @@ static void choose_spell(SaveData* save, int si) {
     advance_char(save);
 }
 
+/* ---- Autopilot (for pictures and testing; not in the original) ----
+ * Each character's command chosen as the menus would choose it: their
+ * healing spell on the most hurt ally when one is under half HP, else
+ * their attack spell while it has charges, else FIGHT the first enemy. */
+static int ap_on, ap_wait;
+static int8_t ap_attack[4], ap_heal[4];
+
+void Battle_SetAutopilot(int on, const int8_t attack[4], const int8_t heal[4]) {
+    ap_on = on;
+    for (int i = 0; i < 4; i++) { ap_attack[i] = attack[i]; ap_heal[i] = heal[i]; }
+}
+
+static int ap_charged(const SaveData* save, int p, int si) {
+    return si >= 0 && si < 64 && save->character_magic[p].cur_mp[si / 8] > 0;
+}
+
+static void autopilot(SaveData* save) {
+    int p = g_btl.cur_char, si = -1, ally = -1;
+    if (ap_charged(save, p, ap_heal[p])) {
+        int worst = 50;                              /* (percent of max HP) */
+        for (int c = 0; c < 4; c++) {
+            const CharacterStats* ch = &save->characters[c];
+            if (ch->ailments & (BTL_AIL_DEAD | BTL_AIL_STONE) || !ch->max_hp) continue;
+            int pct = ch->cur_hp * 100 / ch->max_hp;
+            if (pct < worst) { worst = pct; ally = c; }
+        }
+        if (ally >= 0) si = ap_heal[p];
+    }
+    if (si < 0 && ap_charged(save, p, ap_attack[p])) si = ap_attack[p];
+    if (si >= 0) {
+        choose_spell(save, si);
+        if (g_btl.phase != BPHASE_MAGIC_TGT) return; /* (queued: all enemies, self, the party) */
+        g_btl.char_target[p] = (int8_t)(g_btl.magic_target_enemy ? btl_target_slot(g_btl.target_curs)
+                                                                  : (ally >= 0 ? ally : p));
+        g_btl.char_cmd[p] = BTLC_MAGIC;
+    } else {
+        begin_enemy_target(BPHASE_TARGET);
+        g_btl.char_target[p] = (int8_t)btl_target_slot(g_btl.target_curs);
+        g_btl.char_cmd[p] = BTLC_FIGHT;
+    }
+    advance_char(save);
+}
+
 /* The command menus (BattleLogicLoop's input). */
 static void update_input(SaveData* save, const InputState* in) {
     /* DoFrame_WithInput rolls (and throws away) a BattleRNG number every
@@ -1838,6 +1881,10 @@ static void update_input(SaveData* save, const InputState* in) {
     switch (g_btl.phase) {
     case BPHASE_COMMAND:
         if (!can_input(save, g_btl.cur_char)) { advance_char(save); break; }
+        if (ap_on) {                                 /* (the menu shows a moment first) */
+            if (++ap_wait >= 20) { ap_wait = 0; autopilot(save); }
+            break;
+        }
         /* The 2x4 command menu: FIGHT/MAGIC/DRINK/ITEM, and RUN alone in
          * the second column. */
         if (in->pressed & BTN_UP)    g_btl.cmd_row = (g_btl.cmd_row + 3) & 3;

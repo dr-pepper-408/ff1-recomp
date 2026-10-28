@@ -17,6 +17,7 @@
 #include "game.h"
 #include "battle.h"
 #include "btl_core.h"
+#include "party.h"
 #include "text.h"
 #include "sm_map.h"
 #include "render_sm.h"
@@ -168,6 +169,19 @@ FF1_API void ff1_debug_level(int level) {
         c->cur_hp = c->max_hp;
         for (int l = 0; l < 8; l++) s->character_magic[i].cur_mp[l] = s->character_magic[i].max_mp[l];
     }
+}
+
+/* For pictures: stage 1-5's equipment and spells (Party_DebugKit). */
+FF1_API void ff1_debug_kit(int stage) {
+    Party_DebugKit(&g_ctx.save, stage);
+}
+
+/* For pictures: battle commands chosen for the party (Battle_SetAutopilot;
+ * spell ids, -1 none). */
+FF1_API void ff1_debug_autopilot(int on, const int* attack, const int* heal) {
+    int8_t a[4], h[4];
+    for (int i = 0; i < 4; i++) { a[i] = (int8_t)attack[i]; h[i] = (int8_t)heal[i]; }
+    Battle_SetAutopilot(on, a, h);
 }
 
 /* For testing, the location tour: every standard map (61), each reached by

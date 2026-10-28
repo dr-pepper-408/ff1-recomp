@@ -267,6 +267,85 @@ static void debug_learn(CharacterMagic* m, const uint8_t* spells, int count) {
     }
 }
 
+/*
+ * Kits for pictures (Party_DebugKit): equipment and spells by base class
+ * (class % 6: FT TH BB RM WM BM) for five stages of the journey -- 1 the
+ * Lich, 2 Kary, 3 Kraken, 4 Tiamat, 5 Chaos.  Weapon, then body, shield,
+ * helmet, gloves (armor ids; 0 none); spells by global id (-1 ends).
+ */
+typedef struct { uint8_t weapon, armor[4]; int8_t spells[10]; } DebugKit;
+
+static const DebugKit KITS[5][6] = {
+    {   /* 1: Flame Sword and silver; fire against the Lich */
+        { 20, {  6, 19, 29, 36 }, { -1 } },
+        { 17, {  6, 19, 29, 36 }, { -1 } },
+        {  9, {  6,  0, 29,  0 }, { -1 } },
+        { 17, { 12, 24, 29, 33 }, { 0, 16, 4, 20, -1 } },               /* CURE CUR2 FIRE FIR2 */
+        { 18, { 12,  0, 26, 33 }, { 0, 16, 17, 19, 8, -1 } },           /* CURE CUR2 HRM2 HEAL LAMP */
+        { 16, { 12,  0, 26, 33 }, { 4, 7, 12, 20, 22, -1 } },           /* FIRE LIT ICE FIR2 LIT2 */
+    },
+    {   /* 2: Ice Sword and ice armour; ice against Kary */
+        { 21, {  8, 21, 29, 36 }, { -1 } },
+        { 21, {  8, 21, 29, 36 }, { -1 } },
+        {  9, {  8,  0, 29,  0 }, { -1 } },
+        { 21, { 12, 24, 29, 36 }, { 0, 16, 20, 22, -1 } },              /* CURE CUR2 FIR2 LIT2 */
+        { 18, { 12,  0, 26, 33 }, { 16, 17, 19, 32, -1 } },             /* CUR2 HRM2 HEAL CUR3 */
+        { 16, { 12,  0, 26, 33 }, { 12, 20, 22, 31, -1 } },             /* ICE FIR2 LIT2 ICE2 */
+    },
+    {   /* 3: Coral Sword and opal; lightning against Kraken */
+        { 25, {  9, 22, 30, 39 }, { 0, 16, -1 } },                      /* (a Knight: CURE CUR2) */
+        { 25, {  9, 22, 30, 39 }, { -1 } },
+        { 35, {  9,  0, 30,  0 }, { -1 } },
+        { 32, { 14, 24, 30, 39 }, { 16, 22, 31, -1 } },                 /* CUR2 LIT2 ICE2 */
+        { 36, { 15, 25, 32, 33 }, { 16, 32, 35, 19, -1 } },             /* CUR2 CUR3 HEL2 HEAL */
+        { 31, { 16, 25, 32, 33 }, { 22, 31, 36, 44, -1 } },             /* LIT2 ICE2 FIR3 LIT3 */
+    },
+    {   /* 4: Excalibur and dragon armour; ice and fire against Tiamat */
+        { 39, { 10, 23, 30, 37 }, { 0, 16, 32, -1 } },                  /* CURE CUR2 CUR3 */
+        { 38, { 10, 23, 30, 37 }, { -1 } },
+        { 35, { 10,  0, 32,  0 }, { -1 } },
+        { 24, { 14, 24, 32, 40 }, { 16, 32, 36, 44, -1 } },             /* CUR2 CUR3 FIR3 LIT3 */
+        { 36, { 15, 25, 32, 40 }, { 32, 35, 48, 51, -1 } },             /* CUR3 HEL2 CUR4 HEL3 */
+        { 33, { 16, 25, 32, 40 }, { 36, 44, 52, 31, -1 } },             /* FIR3 LIT3 ICE3 ICE2 */
+    },
+    {   /* 5: the best of everything for Chaos */
+        { 39, { 10, 23, 32, 37 }, { 0, 16, 32, -1 } },
+        { 38, { 10, 23, 32, 37 }, { -1 } },
+        { 35, { 10,  0, 32,  0 }, { -1 } },
+        { 40, { 14, 24, 32, 40 }, { 32, 36, 44, 52, -1 } },             /* CUR3 FIR3 LIT3 ICE3 */
+        { 36, { 15, 25, 32, 40 }, { 48, 51, 57, 56, -1 } },             /* CUR4 HEL3 FADE LIF2 */
+        { 33, { 16, 25, 32, 40 }, { 36, 44, 52, 60, -1 } },             /* FIR3 LIT3 ICE3 NUKE */
+    },
+};
+
+void Party_DebugKit(SaveData* s, int stage) {
+    if (stage < 1 || stage > 5) return;
+    Party_UnadjustEquipStats(s, 0);
+    Party_UnadjustEquipStats(s, 1);
+    for (int i = 0; i < MAX_PARTY_SIZE; i++) {
+        CharacterStats* c = &s->characters[i];
+        const DebugKit* k = &KITS[stage - 1][c->class % 6];
+        memset(c->weapons, 0, sizeof(c->weapons));
+        memset(c->armor, 0, sizeof(c->armor));
+        c->weapons[0] = (uint8_t)(0x80 | k->weapon);
+        for (int a = 0; a < 4; a++) c->armor[a] = k->armor[a] ? (uint8_t)(0x80 | k->armor[a]) : 0;
+        /* The spells, each in its level's next free slot; its level's
+         * charges full (Knights and Ninjas: up to 4). */
+        CharacterMagic* m = &s->character_magic[i];
+        memset(m->spells, 0, sizeof(m->spells));
+        uint8_t cap = (c->class == 6 || c->class == 7) ? 4 : 9;
+        for (int n = 0; n < 10 && k->spells[n] >= 0; n++) {
+            int id = k->spells[n], lvl = id / 8;
+            for (int col = 0; col < 3; col++)
+                if (!m->spells[lvl * 4 + col]) { m->spells[lvl * 4 + col] = (uint8_t)(id % 8 + 1); break; }
+            if (m->max_mp[lvl] < cap) m->max_mp[lvl] = cap;
+            m->cur_mp[lvl] = m->max_mp[lvl];
+        }
+    }
+    Party_ReadjustEquipStats(s, 0);
+    Party_ReadjustEquipStats(s, 1);
+}
+
 void Party_ApplyDebug(SaveData* s) {
     Party_SetGold(s, 50000);
 
