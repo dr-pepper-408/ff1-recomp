@@ -110,7 +110,7 @@ LÖVE front end only:
 src/            the game (C99); main.c, input.c, audio.c are the only SDL files
 src/ff1core.c   the game as a library for other front ends (the LÖVE one)
 src/view3d_*.c  the 3D view's scenes, built from the frame (overworld, maps, battle)
-love/           the LÖVE front end and 3D view
+love/           the LÖVE front end and 3D view (main.lua; world3d.lua, battle3d.lua...)
 src/romdata.c   the game's tables, read from the player's ROM
 tools/          development tools (Python 3): the table list, the layout, checks
 data/generated/ declarations of the game's tables (no data)
