@@ -9,7 +9,7 @@
   PgUp / PgDn or the wheel zoom.  Extras, not in the original: F5 tilt-shift
   blur (HD-2D's miniature look), F6 water shimmer, F7 day / night, F8 the
   battle camera's glide in and drift, F9 random encounters on / off, F10
-  battle speed (1x, 2x, 4x).  (The
+  battle speed (1x, 2x, 4x), F11 battles' EXP and gold (1x, 2x, 4x).  (The
   camera, distance and extras are remembered.)
 
   Test options: --new (skip the title), --shot (new game, screenshot of
@@ -320,6 +320,11 @@ function love.keypressed(key)
         S.battle_speed_i = S.battle_speed_i % #S.BATTLE_SPEEDS + 1
         settings.save()
     end
+    if key == "f11" then
+        S.reward_i = S.reward_i % #S.REWARD_MULTS + 1
+        S.core.ff1_set_reward_mult(S.REWARD_MULTS[S.reward_i])
+        settings.save()
+    end
     if key == "v" then
         S.view_i = S.view_i % #S.VIEWS + 1
         S.VIEW = S.VIEWS[S.view_i][2]
@@ -383,7 +388,8 @@ function love.draw()
     local opt = S.opt
     love.graphics.print(string.format("%s  %s camera, %s view  %d fps  (F2 2D/3D, C camera, V view, Q/E turn, PgUp/PgDn zoom)",
         S.view3d and "3D" or "2D", S.PRESETS[S.preset_i].name, S.VIEWS[S.view_i][1], love.timer.getFPS()), 8, 8)
-    love.graphics.print(string.format("extras: F5 tilt-shift %s, F6 water %s, F7 day/night %s, F8 battle camera move %s, F9 encounters %s, F10 battle speed %dx",
+    love.graphics.print(string.format("extras: F5 tilt-shift %s, F6 water %s, F7 day/night %s, F8 battle camera move %s, F9 encounters %s, F10 battle speed %dx, F11 EXP/gold %dx",
         opt.tiltshift and "on" or "off", opt.shimmer and "on" or "off", opt.daynight and "on" or "off",
-        opt.battlemove and "on" or "off", opt.encounters and "on" or "off", S.BATTLE_SPEEDS[S.battle_speed_i]), 8, 24)
+        opt.battlemove and "on" or "off", opt.encounters and "on" or "off", S.BATTLE_SPEEDS[S.battle_speed_i],
+        S.REWARD_MULTS[S.reward_i]), 8, 24)
 end

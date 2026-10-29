@@ -64,6 +64,13 @@ void Battle_SetRespondRate(int rate) {
     s_respond_rate = rate & 7;
 }
 
+/* An option, not in the original: battles' EXP and gold times this. */
+static int s_reward_mult = 1;
+
+void Battle_SetRewardMultiplier(int mult) {
+    s_reward_mult = mult < 1 ? 1 : mult;
+}
+
 static void battle_over(SaveData* save, BattleResult result);
 
 /* ---- Text for the boxes ---- */
@@ -1309,7 +1316,9 @@ static void victory_rewards(SaveData* save) {
     }
     int survivors = 0;
     for (int i = 0; i < 4; i++) survivors += !char_out(save, i);
-    uint16_t share = Btl_ExpShare(exp, survivors);
+    uint32_t share = Btl_ExpShare(exp, survivors);
+    share *= (uint32_t)s_reward_mult;                     /* (the option: 1 is the original) */
+    gp *= (uint32_t)s_reward_mult;
 
     uint32_t gold = Party_Gold(save) + gp;                /* GiveRewardToParty */
     Party_SetGold(save, gold >= 1000000 ? 999999 : gold);

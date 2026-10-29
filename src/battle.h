@@ -50,6 +50,10 @@ int Battle_WaitingForInput(void);
  *  battles use from the next one on.  0 is the original's default. */
 void Battle_SetRespondRate(int rate);
 
+/** An option, not in the original: battles' EXP and gold rewards times
+ *  `mult` (1, the default, is the original). */
+void Battle_SetRewardMultiplier(int mult);
+
 /** For pictures and testing (not in the original): when `on`, character
  *  i's commands are chosen for them -- heal[i] (a spell id, -1 none) on the
  *  most hurt ally under half HP, else attack[i] while it has charges, else

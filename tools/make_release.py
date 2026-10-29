@@ -53,6 +53,7 @@ Q / E           turn the camera;  PgUp / PgDn  zoom
 F5 F6 F7 F8     tilt-shift, water shimmer, day and night, battle camera motion
 F9              random encounters on / off
 F10             battle speed 1x / 2x / 4x
+F11             EXP and gold from battles 1x / 2x / 4x
 Esc             quit
 
 Final Fantasy is (c) Square Enix. Not affiliated with or endorsed by

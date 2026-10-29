@@ -45,10 +45,10 @@ end
 function Set.save()
     local opt = S.opt
     write_file(Set.data_dir .. "/" .. SETTINGS,
-          string.format("preset=%d\nview=%d\ntiltshift=%d\nshimmer=%d\ndaynight=%d\nbattlemove=%d\nencounters=%d\nbattlespeed=%d\n",
+          string.format("preset=%d\nview=%d\ntiltshift=%d\nshimmer=%d\ndaynight=%d\nbattlemove=%d\nencounters=%d\nbattlespeed=%d\nrewards=%d\n",
                         S.preset_i, S.view_i, opt.tiltshift and 1 or 0, opt.shimmer and 1 or 0,
                         opt.daynight and 1 or 0, opt.battlemove and 1 or 0, opt.encounters and 1 or 0,
-                        S.battle_speed_i))
+                        S.battle_speed_i, S.reward_i))
 end
 
 function Set.load()
@@ -60,6 +60,8 @@ function Set.load()
     if v and S.VIEWS[v] then S.view_i = v end
     local bs = tonumber(text:match("battlespeed=(%d)"))
     if bs and S.BATTLE_SPEEDS[bs] then S.battle_speed_i = bs end
+    local rw = tonumber(text:match("rewards=(%d)"))
+    if rw and S.REWARD_MULTS[rw] then S.reward_i = rw end
     for _, k in ipairs({ "tiltshift", "shimmer", "daynight", "battlemove", "encounters" }) do
         local x = text:match(k .. "=(%d)")
         if x then S.opt[k] = x == "1" end

@@ -103,6 +103,7 @@ LÖVE front end only:
 | `F5` `F6` `F7` `F8` | Tilt-shift, water shimmer, day and night, battle camera motion |
 | `F9` | Random encounters on / off |
 | `F10` | Battle speed 1x / 2x / 4x |
+| `F11` | EXP and gold from battles 1x / 2x / 4x |
 
 ## Layout
 

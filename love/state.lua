@@ -12,6 +12,8 @@ S.yaw = 0                          -- the map camera's turn (Q / E)
 S.opt = { tiltshift = true, shimmer = true, daynight = false, battlemove = true, encounters = true }
 S.BATTLE_SPEEDS = { 1, 2, 4 }      -- F10: frames of battle per frame
 S.battle_speed_i = 1
+S.REWARD_MULTS = { 1, 2, 4 }       -- F11: battles' EXP and gold times this
+S.reward_i = 1
 
 S.VIEW = 560                       -- draw distance (pixels); fog ends there (V cycles)
 S.VIEWS = { { "near", 420 }, { "normal", 560 }, { "far", 760 } }

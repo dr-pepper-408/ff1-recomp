@@ -33,6 +33,7 @@ function R.start_game()
     local core = S.core
     if core.ff1_init(R.save_file, R.new_game) ~= 0 then error("ff1_init failed") end
     core.ff1_set_encounters(S.opt.encounters and 1 or 0)
+    core.ff1_set_reward_mult(S.REWARD_MULTS[S.reward_i])
     S.started, R.prompt = true, nil
     set_icon()
 end

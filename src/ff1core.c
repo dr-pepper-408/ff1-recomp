@@ -232,6 +232,11 @@ FF1_API void ff1_set_encounters(int on) {
     Game_SetRandomEncounters(on);
 }
 
+/* Battles' EXP and gold times `mult` (an option, not in the original; 1 is). */
+FF1_API void ff1_set_reward_mult(int mult) {
+    Battle_SetRewardMultiplier(mult);
+}
+
 FF1_API void ff1_class_sprite(int cls, uint8_t* rgba) {
     const uint8_t* pal = BattleSpritePalettes + (lutClassBatSprPalette[cls % 12] & 3) * 4;
     memset(rgba, 0, 16 * 24 * 4);

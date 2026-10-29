@@ -180,6 +180,9 @@ FF1_API int ff1_tour_go(int i, int* info);
 /** Random encounters on (as the original) or off; fixed battles still happen. */
 FF1_API void ff1_set_encounters(int on);
 
+/** Battles' EXP and gold rewards times `mult` (1, as the original; an option). */
+FF1_API void ff1_set_reward_mult(int mult);
+
 /** Class `cls`'s standing battle sprite (DrawSimple2x3Sprite), 16 x 24
  *  RGBA, colour 0 clear -- drawn from the ROM (call after ff1_init). */
 FF1_API void ff1_class_sprite(int cls, uint8_t* rgba);

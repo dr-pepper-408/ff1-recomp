@@ -31,6 +31,7 @@
 #include "music.h"
 #include "minigame.h"
 #include "party.h"
+#include "rng.h"
 #include "../data/generated/shop_data.h"
 
 /* game.c calls Input_Init; input.c needs SDL, so stub it here. */
@@ -439,6 +440,38 @@ int main(int argc, char** argv) {
                level + 1, c->level + 1, max_hp, c->max_hp, (unsigned)gold,
                (unsigned)Party_Gold(&g_ctx.save), c->exp_to_next);
         settle();
+    }
+
+    /* An option, not in the original: the EXP and gold multiplier (F11).
+     * The same battle from the same state, at 1x and at 4x. */
+    {
+        const InputState a = { BTN_A, BTN_A, 0 };
+        SaveData save0 = g_ctx.save;
+        RngState rng0;
+        Rng_GetState(&rng0);
+        uint32_t gp[2], xp[2];
+        for (int k = 0; k < 2; k++) {
+            g_ctx.save = save0;
+            Rng_SetState(&rng0);
+            Battle_SetRewardMultiplier(k ? 4 : 1);
+            const CharacterStats* c = &g_ctx.save.characters[0];
+            uint32_t gold = Party_Gold(&g_ctx.save);
+            uint32_t exp = c->exp[0] | (uint32_t)c->exp[1] << 8 | (uint32_t)c->exp[2] << 16;
+            g_ctx.pending_formation = Battle_PickFormation(Battle_LandDomain(0x99, 0xA5));
+            ScreenFx_Start(&g_ctx.fx, SCREENFX_BATTLE, NULL);
+            g_ctx.fx_next = FXNEXT_BATTLE;
+            g_ctx.state = GS_FX;
+            while (g_ctx.state == GS_FX) step(&none, 1);
+            for (int frames = 0; g_ctx.state == GS_BATTLE && frames < 30000; frames++)
+                step((frames % 8) == 0 ? &a : &none, 1);
+            gp[k] = Party_Gold(&g_ctx.save) - gold;
+            xp[k] = (c->exp[0] | (uint32_t)c->exp[1] << 8 | (uint32_t)c->exp[2] << 16) - exp;
+            settle();
+        }
+        Battle_SetRewardMultiplier(1);
+        printf("%s: EXP and gold multiplier: 1x %u EXP, %u gold; 4x %u EXP, %u gold\n",
+               gp[0] && xp[0] && gp[1] == 4 * gp[0] && xp[1] == 4 * xp[0] ? "PASS" : "FAIL",
+               (unsigned)xp[0], (unsigned)gp[0], (unsigned)xp[1], (unsigned)gp[1]);
     }
 
     /* One formation of each type, as laid out by PrepareEnemyFormation:

@@ -22,6 +22,7 @@ void ff1_focus(float* xyz);
 int ff1_sprites(Ff1Vertex* out, int max, uint8_t* atlas, float yaw);
 void ff1_debug_place(int tx, int ty, int vehicle);
 void ff1_set_encounters(int on);
+void ff1_set_reward_mult(int mult);
 int ff1_shadows(float* out, int max);
 int ff1_props(Ff1Vertex* out, int max, float yaw);
 int ff1_battle3d(void);
