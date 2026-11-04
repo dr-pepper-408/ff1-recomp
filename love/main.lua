@@ -235,11 +235,16 @@ function love.update(dt)
     local n = 0
     while acc >= NES_FRAME do
         acc = acc - NES_FRAME
-        -- (F10) Battles run faster: several game frames to a frame; only
-        -- the last one's sound is kept, so the music stays in tune.
+        -- (Battle speed) Battles run faster: several game frames to a frame.
+        -- The extra ones don't step the music, so it keeps its pace; only
+        -- the last one's sound is kept, so it stays in tune.
         local extra = core.ff1_battle3d() == 1 and S.BATTLE_SPEEDS[S.battle_speed_i] - 1 or 0
         local b = buttons()
-        for _ = 1, extra do core.ff1_frame(b) end
+        if extra > 0 then
+            core.ff1_set_music_hold(1)
+            for _ = 1, extra do core.ff1_frame(b) end
+            core.ff1_set_music_hold(0)
+        end
         core.ff1_frame(b)
         if place then core.ff1_debug_place(place[1], place[2], place[3] or 0); place = nil end
         if set_classes then

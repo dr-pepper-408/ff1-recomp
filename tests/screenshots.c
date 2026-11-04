@@ -442,6 +442,35 @@ int main(int argc, char** argv) {
         settle();
     }
 
+    /* The battle speedup (an option, not in the original): its extra frames
+     * hold the music, so at 4x (3 held frames and a normal one per frame
+     * shown) the music plays one frame per frame shown, as at 1x. */
+    {
+        g_ctx.pending_formation = Battle_PickFormation(Battle_LandDomain(0x99, 0xA5));
+        ScreenFx_Start(&g_ctx.fx, SCREENFX_BATTLE, NULL);
+        g_ctx.fx_next = FXNEXT_BATTLE;
+        g_ctx.state = GS_FX;
+        while (g_ctx.state == GS_FX) step(&none, 1);
+        uint32_t m0 = Music_Frames();
+        Game_SetMusicHold(1);
+        step(&none, 3);
+        Game_SetMusicHold(0);
+        uint32_t held = Music_Frames() - m0;
+        m0 = Music_Frames();
+        for (int f = 0; f < 60; f++) {             /* 60 frames shown at 4x */
+            Game_SetMusicHold(1);
+            step(&none, 3);
+            Game_SetMusicHold(0);
+            step(&none, 1);
+        }
+        uint32_t fast = Music_Frames() - m0;
+        printf("%s: battle speedup: the music %u frames in 3 held frames, %u in 60 frames shown at 4x\n",
+               held == 0 && fast == 60 ? "PASS" : "FAIL", (unsigned)held, (unsigned)fast);
+        const InputState run = { BTN_A, BTN_A, 0 };
+        for (int f = 0; g_ctx.state == GS_BATTLE && f < 30000; f++) step((f % 8) == 0 ? &run : &none, 1);
+        settle();
+    }
+
     /* An option, not in the original: the EXP and gold multiplier (F11).
      * The same battle from the same state, at 1x and at 4x. */
     {

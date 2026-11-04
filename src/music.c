@@ -157,7 +157,12 @@ uint8_t Music_VehicleTrack(int vehicle) {
 uint8_t Music_CurrentSong(void) { return current_song; }
 uint8_t Music_TilesetTrack(int tileset) { return lut_TilesetMusicTrack[tileset & 7]; }
 
+static uint32_t s_frames;          /* (frames of music played, for tests) */
+
+uint32_t Music_Frames(void) { return s_frames; }
+
 void Music_Play(void) {
+    s_frames++;
     if (g_music_followup && (g_music_track & 0x80)) g_music_track = g_music_followup;
     if (g_music_track & 0x80) {                 /* the song is over */
         if (g_music_track == 0x80) {

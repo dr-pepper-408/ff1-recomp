@@ -45,6 +45,9 @@ void Music_Play(void);
 /** The track ($41+) most recently started, for tests. */
 uint8_t Music_CurrentSong(void);
 
+/** How many frames of music have played (MusicPlay calls), for tests. */
+uint32_t Music_Frames(void);
+
 /** PrepOverworld's @lut_VehicleMusic: the overworld's track for `vehicle`. */
 uint8_t Music_VehicleTrack(int vehicle);
 

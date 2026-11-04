@@ -232,6 +232,11 @@ FF1_API void ff1_set_encounters(int on) {
     Game_SetRandomEncounters(on);
 }
 
+/* The battle speedup's extra frames: while on, the music isn't stepped. */
+FF1_API void ff1_set_music_hold(int on) {
+    Game_SetMusicHold(on);
+}
+
 /* Battles' EXP and gold times `mult` (an option, not in the original; 1 is). */
 FF1_API void ff1_set_reward_mult(int mult) {
     Battle_SetRewardMultiplier(mult);

@@ -151,6 +151,10 @@ void Game_SetSavePath(const char* path);
  *  battles (spiked tiles, bosses) are not affected. */
 void Game_SetRandomEncounters(int on);
 
+/** For a speedup (an option, not in the original): while on, frames don't
+ *  step the music (MusicPlay), so running extra frames keeps its pace. */
+void Game_SetMusicHold(int on);
+
 /** SaveGame: save to the SRAM file now.  @return 1 on success. */
 int Game_Save(GameContext* g);
 

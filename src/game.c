@@ -359,6 +359,12 @@ static int s_random_encounters = 1;
 
 void Game_SetRandomEncounters(int on) { s_random_encounters = on != 0; }
 
+/* For the battle speedup (an option, not in the original): frames that
+ * don't step the music, so it keeps its pace. */
+static int s_music_hold = 0;
+
+void Game_SetMusicHold(int on) { s_music_hold = on != 0; }
+
 static int ow_can_move(GameContext* g, int x, int y) {
     uint8_t v = g->player.vehicle;
     if (!OWMap_CanMove(x, y, v)) return 0;               /* tileprop AND vehicle */
@@ -949,7 +955,8 @@ void Game_Update(GameContext* g, const InputState* input) {
     g->framecounter++;
     /* CallMusicPlay: a frame of music.  The screen wipes, the battle
      * transition and DoAltarEffect don't call it. */
-    if (!(g->state == GS_FX && g->fx.kind != SCREENFX_PALCYC_OUT && g->fx.kind != SCREENFX_PALCYC_IN))
+    if (!(g->state == GS_FX && g->fx.kind != SCREENFX_PALCYC_OUT && g->fx.kind != SCREENFX_PALCYC_IN) &&
+        !s_music_hold)                 /* (the battle speedup's extra frames) */
         Music_Play();
     /* DrawOWSprites @OnFoot: a rising airship (airship_vis < $1F) is drawn
      * every other 2 frames while its counter runs up. */
