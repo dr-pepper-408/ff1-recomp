@@ -1,16 +1,17 @@
 --[[
   A LOVE front end for the C port: the game runs in ff1core.dll (built by
   CMake into ../build), loaded through LuaJIT's FFI.  This does what
-  main.c, input.c and audio.c do for the SDL build, and adds a 3D view of
-  the overworld (F2).
+  main.c, input.c and audio.c do for the SDL build, and adds a 3D view.
 
-  Keys: arrows, Z = A, X = B, Tab = Select, Enter = Start (as the SDL build).
-  F2 2D / 3D,  C camera preset,  V view distance,  Q / E turn the camera,
-  PgUp / PgDn or the wheel zoom.  Extras, not in the original: F5 tilt-shift
-  blur (HD-2D's miniature look), F6 water shimmer, F7 day / night, F8 the
-  battle camera's glide in and drift, F9 random encounters on / off, F10
-  battle speed (1x, 2x, 4x), F11 battles' EXP and gold (1x, 2x, 4x).  (The
-  camera, distance and extras are remembered.)
+  Keys: arrows, Z = A, X = B, Tab = Select, Enter = Start (as the SDL build),
+  or a game controller; both can be remapped (input.lua).  Q / E or the
+  right stick turn the map camera, PgUp / PgDn, the wheel or the right stick
+  zoom.  Esc (Select + Start on a controller) opens the options menu
+  (menu.lua): 2D / 3D, the camera and view distance, and the extras, not in
+  the original -- tilt-shift blur (HD-2D's miniature look), water shimmer,
+  day and night, the battle camera's glide in and drift, random encounters
+  on / off, battle speed (1x, 2x, 4x), battles' EXP and gold (1x, 2x, 4x)
+  -- and the controls.  All are remembered.
 
   Test options: --new (skip the title), --shot (new game, screenshot of
   the 3D view, quit), --at=X,Y (put the party on that overworld tile),
@@ -25,7 +26,8 @@
   --teleport=N (take normal teleport N: a dungeon's floors; see --tour),
   --inroom (with --enter: as if through a door, the rooms' insides shown),
   --dialogue=N (show dialogue N, as talking does), --2d (start in 2D),
-  --nohud (no status lines at the top, for pictures),
+  --nohud (no hint or menu, for pictures), --menu / --menu=controls (the
+  options menu open at once),
   --tour (every standard map in turn: ] / [ next / previous),
   --tour-shots (a picture of each map in the save folder's tour/, then quit),
   --record=NAME (a 1024 x 960 video, videos/NAME.mp4; --rec-frames=N long,
@@ -47,7 +49,9 @@
   functions), settings.lua (where files live, the settings), rom.lua (the
   ROM prompt, starting the game), world3d.lua and battle3d.lua (the 3D
   view), effects.lua (day / night, tilt-shift), shaders.lua, matrix.lua,
-  landmarks.lua (--landmark-refs), tour.lua (--tour).
+  landmarks.lua (--landmark-refs), tour.lua (--tour), record.lua
+  (--record), input.lua (the keyboard and controllers), menu.lua (the
+  options menu).
 ]]
 
 local ffi = require("ffi")
@@ -61,6 +65,8 @@ local battle3d = require("battle3d")
 local landmarks = require("landmarks")
 local tour = require("tour")
 local record = require("record")
+local input = require("input")
+local menu = require("menu")
 
 local NES_FRAME = 16639267 / 1e9   -- 60.0988 Hz (config.h NES_FRAME_NS)
 
@@ -86,6 +92,7 @@ local shot_t0
 local auto_a                               -- --auto: tap A every 16 frames
 local walk                                 -- --walk: { button, frames } still to press
 local spin                                 -- --spin: degrees a second
+local show_menu                            -- --menu[=controls]: open the options menu at once
 
 function love.load(args)
     local src = love.filesystem.getSource()
@@ -109,6 +116,8 @@ function love.load(args)
         if a == "--inroom" then inroom_at = 120 end
         if a == "--2d" then S.view3d = false end
         if a == "--nohud" then no_hud = true end
+        local mp = a == "--menu" and "options" or a:match("^%-%-menu=(%a+)$")
+        if mp then show_menu = mp end
         local rn = a:match("^%-%-record=([%w_%-]+)$")
         if rn then record.start(rn); no_hud = true end
         local rf = a:match("^%-%-rec%-frames=(%d+)$")
@@ -204,15 +213,7 @@ function love.quit()
 end
 
 local function buttons()
-    local k, b = love.keyboard.isDown, 0
-    if k("right") then b = b + 0x01 end
-    if k("left") then b = b + 0x02 end
-    if k("down") then b = b + 0x04 end
-    if k("up") then b = b + 0x08 end
-    if k("z", "space") then b = b + 0x10 end
-    if k("x", "backspace") then b = b + 0x20 end
-    if k("tab", "rshift") then b = b + 0x40 end
-    if k("return", "kpenter") then b = b + 0x80 end
+    local b = input.buttons()
     if walk and walk[1] then                     -- (--walk: the script's button, held)
         local step = walk[1]
         local bits = { U = 0x08, D = 0x04, L = 0x02, R = 0x01, A = 0x10, B = 0x20, W = 0 }
@@ -228,7 +229,7 @@ local function buttons()
 end
 
 function love.update(dt)
-    if not S.started then return end
+    if not S.started or menu.open then return end  -- (the game waits while the menu is open)
     local core = S.core
     acc = record.on and NES_FRAME or math.min(acc + dt, NES_FRAME * 4)   -- (--record: one frame a picture)
     local n = 0
@@ -270,6 +271,7 @@ function love.update(dt)
             if dialogue_at == 0 then core.ff1_debug_dialogue(dialogue_id); dialogue_at = nil end
         end
         tour.frame()
+        if show_menu then menu.show(show_menu); show_menu = nil end
         local got = core.ff1_audio(audio_tmp + n, 8192 - n)
         record.audio(audio_tmp + n, got)
         n = n + got
@@ -288,6 +290,9 @@ function love.update(dt)
     if love.keyboard.isDown("e") then S.yaw = S.yaw + dt * 1.5 end
     if love.keyboard.isDown("pageup") then S.zoom = math.max(0.4, S.zoom - dt * 0.8) end
     if love.keyboard.isDown("pagedown") then S.zoom = math.min(2.0, S.zoom + dt * 0.8) end
+    local turn, zoom = input.camera_stick()
+    S.yaw = S.yaw + turn * dt * 1.5
+    S.zoom = math.min(2.0, math.max(0.4, S.zoom + zoom * dt * 0.8))
     local cam = S.cam
     local pr, k = S.PRESETS[S.preset_i], 1 - math.exp(-dt * 6)   -- (ease towards the preset)
     cam.dist = cam.dist + (pr.dist * S.zoom - cam.dist) * k
@@ -300,38 +305,24 @@ function love.wheelmoved(_, y)
 end
 
 function love.keypressed(key)
-    local opt = S.opt
-    if key == "f2" then S.view3d = not S.view3d end
-    if key == "c" then
-        S.preset_i = S.preset_i % #S.PRESETS + 1
-        S.zoom = 1
-        settings.save()
+    if not S.started then                          -- (the ROM prompt: Esc quits)
+        if key == "escape" then love.event.quit() end
+        return
     end
-    if key == "f5" then opt.tiltshift = not opt.tiltshift; settings.save() end
-    if key == "f6" then opt.shimmer = not opt.shimmer; settings.save() end
-    if key == "f7" then opt.daynight = not opt.daynight; settings.save() end
-    if key == "f8" then opt.battlemove = not opt.battlemove; settings.save() end
-    if key == "f9" then
-        opt.encounters = not opt.encounters
-        S.core.ff1_set_encounters(opt.encounters and 1 or 0)
-        settings.save()
-    end
-    if key == "f10" then
-        S.battle_speed_i = S.battle_speed_i % #S.BATTLE_SPEEDS + 1
-        settings.save()
-    end
-    if key == "f11" then
-        S.reward_i = S.reward_i % #S.REWARD_MULTS + 1
-        S.core.ff1_set_reward_mult(S.REWARD_MULTS[S.reward_i])
-        settings.save()
-    end
-    if key == "v" then
-        S.view_i = S.view_i % #S.VIEWS + 1
-        S.VIEW = S.VIEWS[S.view_i][2]
-        settings.save()
-    end
+    if menu.open then menu.keypressed(key); return end
+    if key == "escape" then menu.toggle(); return end
     tour.keypressed(key)
-    if key == "escape" then love.event.quit() end
+end
+
+-- A controller: Select + Start (or the Guide button) opens the menu.
+function love.gamepadpressed(joystick, button)
+    if not S.started then return end
+    if menu.open then menu.gamepadpressed(button); return end
+    local sel, start = input.pad.select, input.pad.start
+    if button == "guide" or (button == start and joystick:isGamepadDown(sel)) or
+       (button == sel and joystick:isGamepadDown(start)) then
+        menu.toggle()
+    end
 end
 
 local function draw2d()
@@ -385,11 +376,10 @@ function love.draw()
         end
     end
     if no_hud then return end
-    local opt = S.opt
-    love.graphics.print(string.format("%s  %s camera, %s view  %d fps  (F2 2D/3D, C camera, V view, Q/E turn, PgUp/PgDn zoom)",
-        S.view3d and "3D" or "2D", S.PRESETS[S.preset_i].name, S.VIEWS[S.view_i][1], love.timer.getFPS()), 8, 8)
-    love.graphics.print(string.format("extras: F5 tilt-shift %s, F6 water %s, F7 day/night %s, F8 battle camera move %s, F9 encounters %s, F10 battle speed %dx, F11 EXP/gold %dx",
-        opt.tiltshift and "on" or "off", opt.shimmer and "on" or "off", opt.daynight and "on" or "off",
-        opt.battlemove and "on" or "off", opt.encounters and "on" or "off", S.BATTLE_SPEEDS[S.battle_speed_i],
-        S.REWARD_MULTS[S.reward_i]), 8, 24)
+    menu.draw()
+    if not menu.open and love.timer.getTime() < 8 then   -- (a hint, the first seconds)
+        love.graphics.setColor(1, 1, 1, math.min(1, 8 - love.timer.getTime()))
+        love.graphics.print("Esc (Select + Start on a controller): options", 8, 8)
+        love.graphics.setColor(1, 1, 1, 1)
+    end
 end

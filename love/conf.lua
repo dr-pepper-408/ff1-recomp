@@ -9,5 +9,5 @@ function love.conf(t)
     t.window.vsync = 1
     t.window.depth = 24          -- the 3D view needs a depth buffer
     t.modules.physics = false
-    t.modules.joystick = false
+    t.modules.joystick = true          -- (game controllers: input.lua)
 end

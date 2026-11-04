@@ -11,7 +11,8 @@ It has two front ends:
 - **LÖVE** (`love/`): the same game, with an optional 3D view in the style
   of HD-2D games: a voxel overworld, towns and dungeons in 3D, characters as
   2D cutouts, a battle diorama, camera presets and a few extras (tilt-shift,
-  day and night). F2 switches between 2D and 3D.
+  day and night), set in an options menu; game controllers, with remappable
+  controls.
 
 | 2D | 3D |
 |----|----|
@@ -91,19 +92,19 @@ keeps the ROM's copy, the save and the settings beside `FF1-recomp.exe`
 | `X` / `Backspace` | B |
 | `Tab` / `Right Shift` | Select |
 | `Enter` | Start |
-| `Esc` | Quit |
+| `Esc` | Quit (SDL); the options menu (LÖVE) |
 
 LÖVE front end only:
 
-| Key | Action |
+| Key / controller | Action |
 |-----|--------|
-| `F2` | 2D / 3D |
-| `C` / `V` | Camera preset / view distance |
-| `Q` / `E`, `PgUp` / `PgDn` | Turn / zoom the camera |
-| `F5` `F6` `F7` `F8` | Tilt-shift, water shimmer, day and night, battle camera motion |
-| `F9` | Random encounters on / off |
-| `F10` | Battle speed 1x / 2x / 4x |
-| `F11` | EXP and gold from battles 1x / 2x / 4x |
+| `Esc`, or Select + Start | The options menu: 2D / 3D, camera preset, view distance, tilt-shift, water shimmer, day and night, battle camera motion, random encounters, battle speed (1x / 2x / 4x), EXP and gold from battles (1x / 2x / 4x), controls, quit |
+| `Q` / `E`, `PgUp` / `PgDn` or the wheel, right stick | Turn / zoom the camera |
+
+A game controller works as the pad: D-pad or left stick, A (bottom
+button), B (right), Back as Select, Start. Every button, on the keyboard
+and on the controller, can be remapped in the menu's Controls page; the
+settings and the mapping are remembered.
 
 ## Layout
 

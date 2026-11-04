@@ -40,21 +40,21 @@ when you update, and don't share the folder with rom.nes in it. If the
 folder can't be written to (e.g. in Program Files), they go to
 %APPDATA%\\ff1-recomp instead.
 
-Keys
-----
-Arrows          move, move the cursor
-Z / Space       A
-X / Backspace   B
-Tab             Select
-Enter           Start
-F2              2D / 3D
-C / V           camera preset / view distance
-Q / E           turn the camera;  PgUp / PgDn  zoom
-F5 F6 F7 F8     tilt-shift, water shimmer, day and night, battle camera motion
-F9              random encounters on / off
-F10             battle speed 1x / 2x / 4x
-F11             EXP and gold from battles 1x / 2x / 4x
-Esc             quit
+Keys and controllers
+-------------------
+Arrows          move, move the cursor      (controller: D-pad or left stick)
+Z / Space       A                          (controller: bottom button)
+X / Backspace   B                          (controller: right button)
+Tab             Select                     (controller: Back)
+Enter           Start                      (controller: Start)
+Q / E           turn the camera;  PgUp / PgDn  zoom   (controller: right stick)
+Esc             the options menu           (controller: Select + Start)
+
+The options menu sets the view (2D / 3D), the camera, the view distance,
+the extras (tilt-shift, water shimmer, day and night, battle camera
+motion, random encounters, battle speed, EXP and gold from battles) and
+the controls: every button can be remapped, on the keyboard and on the
+controller. Everything is remembered. Quit the game from the menu.
 
 Final Fantasy is (c) Square Enix. Not affiliated with or endorsed by
 Square Enix. Made with LOVE (love2d.org, zlib licence).

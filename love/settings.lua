@@ -1,5 +1,6 @@
 -- Where the save, settings and ROM copy live, and the settings themselves.
 local S = require("state")
+local input = require("input")
 local Set = {}
 
 local SETTINGS = "settings.txt"
@@ -45,10 +46,10 @@ end
 function Set.save()
     local opt = S.opt
     write_file(Set.data_dir .. "/" .. SETTINGS,
-          string.format("preset=%d\nview=%d\ntiltshift=%d\nshimmer=%d\ndaynight=%d\nbattlemove=%d\nencounters=%d\nbattlespeed=%d\nrewards=%d\n",
+          string.format("preset=%d\nview=%d\ntiltshift=%d\nshimmer=%d\ndaynight=%d\nbattlemove=%d\nencounters=%d\nbattlespeed=%d\nrewards=%d\nview3d=%d\n",
                         S.preset_i, S.view_i, opt.tiltshift and 1 or 0, opt.shimmer and 1 or 0,
                         opt.daynight and 1 or 0, opt.battlemove and 1 or 0, opt.encounters and 1 or 0,
-                        S.battle_speed_i, S.reward_i))
+                        S.battle_speed_i, S.reward_i, S.view3d and 1 or 0) .. input.serialize())
 end
 
 function Set.load()
@@ -66,6 +67,9 @@ function Set.load()
         local x = text:match(k .. "=(%d)")
         if x then S.opt[k] = x == "1" end
     end
+    local v3 = text:match("view3d=(%d)")
+    if v3 then S.view3d = v3 == "1" end
+    input.parse(text)
     S.VIEW = S.VIEWS[S.view_i][2]
     local pr = S.PRESETS[S.preset_i]
     S.cam.dist, S.cam.pitch, S.cam.fov = pr.dist, pr.pitch, pr.fov
