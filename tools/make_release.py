@@ -12,6 +12,10 @@ Builds release/FF1-recomp/ (and release/FF1-recomp-windows.zip):
 
 No game data is included: on first launch the game asks for the player's
 ROM of Final Fantasy (USA).  Build first (cmake --build build).
+
+If you play from release/FF1-recomp/, the game keeps its save, settings and
+ROM copy there (ff1.sav, settings.txt, rom.nes): they are set aside while
+the folder is rebuilt and put back after the zip is made, never in it.
 """
 
 import argparse
@@ -61,6 +65,9 @@ Square Enix. Made with LOVE (love2d.org, zlib licence).
 """
 
 
+PLAYER_FILES = ("ff1.sav", "settings.txt", "rom.nes")   # (what the game keeps beside FF1-recomp.exe)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--love", default=r"C:/Program Files/LOVE", help="the LÖVE 11.5 folder")
@@ -74,6 +81,33 @@ def main():
         raise SystemExit(f"{love_exe} missing: install LÖVE 11.5 or pass --love")
 
     out = os.path.join(PORT, "release", "FF1-recomp")
+    # The player's files from playing this folder (the release is portable):
+    # set aside while it's rebuilt, put back after the zip (never in it).
+    kept = os.path.join(PORT, "release", "player-data-kept")
+    moved = []
+    for name in PLAYER_FILES:
+        src = os.path.join(out, name)
+        if not os.path.exists(src):
+            continue
+        if os.path.exists(os.path.join(kept, name)):
+            raise SystemExit(f"{kept} already holds {name} (from a run that failed?): "
+                             f"put it back in {out} or remove it, then run again")
+        os.makedirs(kept, exist_ok=True)
+        shutil.move(src, os.path.join(kept, name))
+        moved.append(name)
+    try:
+        build(args, dll, love_exe, out)
+    finally:
+        os.makedirs(out, exist_ok=True)
+        for name in moved:
+            shutil.move(os.path.join(kept, name), os.path.join(out, name))
+        if moved and not os.listdir(kept):
+            os.rmdir(kept)
+    if moved:
+        print(f"kept your {', '.join(moved)} in {out} (not in the zip)")
+
+
+def build(args, dll, love_exe, out):
     try:
         if os.path.exists(out):
             shutil.rmtree(out)
