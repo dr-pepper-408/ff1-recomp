@@ -704,6 +704,25 @@ static void test_save_game(void) {
     if (f) { fwrite(file, 1, SAVE_FILE_SIZE, f); fclose(f); }
     CHECK(!Save_ReadFile(path, &loaded));
     remove(path);
+
+    /* Saving again keeps the previous save as PATH.bak (not in the
+     * original), and leaves no temporary file. */
+    char bak[64], tmp[64];
+    snprintf(bak, sizeof(bak), "%s.bak", path);
+    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
+    remove(bak);
+    CHECK(Save_WriteFile(path, &unsram, &sram));
+    SaveData second_u = unsram, second = sram;
+    Party_SetGold(&second_u, 777);
+    Save_Game(&second_u, 0x92, 0x9E, 1, &second);
+    CHECK(Save_WriteFile(path, &second_u, &second));
+    CHECK(Save_ReadFile(path, &loaded) && Party_Gold(&loaded) == 777);
+    CHECK(Save_ReadFile(bak, &loaded) && Party_Gold(&loaded) == 12345);
+    f = fopen(tmp, "rb");
+    CHECK(f == NULL);
+    if (f) fclose(f);
+    remove(path);
+    remove(bak);
 }
 
 /* The APU, and the music driver writing to it. */

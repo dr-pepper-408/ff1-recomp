@@ -37,12 +37,16 @@ Starting
 Run FF1-recomp.exe. The first time, it asks for the ROM: drag the file onto
 the window. It must be Final Fantasy (USA), the original 1990 NES release,
 unmodified (other versions, translations and hacks don't work). It is
-checked and kept in this folder as rom.nes, so you're asked only once.
+checked and kept in %APPDATA%\\ff1-recomp as rom.nes, so you're asked only
+once.
 
-Your game is saved in this folder too (ff1.sav, settings.txt): keep them
-when you update, and don't share the folder with rom.nes in it. If the
-folder can't be written to (e.g. in Program Files), they go to
-%APPDATA%\\ff1-recomp instead.
+Your game is saved there too (ff1.sav; the save before it as ff1.sav.bak),
+with your settings (settings.txt). A new version, unzipped anywhere, finds
+them: nothing to copy when you update.
+
+Portable: put an empty file named portable.txt beside FF1-recomp.exe and
+the ROM copy, the save and the settings are kept in this folder instead
+(for a USB stick, say). Don't share the folder with rom.nes in it.
 
 Keys and controllers
 -------------------

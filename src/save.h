@@ -26,7 +26,9 @@ void Save_Game(SaveData* unsram, uint8_t ow_scroll_x, uint8_t ow_scroll_y,
  *  @return 1 if `sram` holds a valid save. */
 int Save_Valid(const SaveData* sram);
 
-/** Write the 8 KB SRAM file.  @return 1 on success. */
+/** Write the 8 KB SRAM file; the previous one is kept as PATH.bak, and the
+ *  new one is written to PATH.tmp first, then put in place (not in the
+ *  original).  @return 1 on success. */
 int Save_WriteFile(const char* path, const SaveData* unsram, const SaveData* sram);
 
 /** Read the sram copy out of an 8 KB SRAM file and validate it.

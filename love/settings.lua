@@ -5,11 +5,13 @@ local Set = {}
 
 local SETTINGS = "settings.txt"
 
--- Where the save, settings and ROM copy live (data_dir): in a release, the
--- program's own folder when it can be written to (a portable folder), else
--- LOVE's save folder.  Read and written with io, as LOVE can only write to
--- its save folder.
+-- Where the save, settings and ROM copy live (data_dir): LOVE's save folder
+-- (%APPDATA%\ff1-recomp for the release), which every release finds,
+-- wherever it was unzipped.  A portable.txt beside the program keeps them
+-- in the program's folder instead (when it can be written to).  Read and
+-- written with io, as LOVE can only write to its save folder.
 Set.data_dir = nil
+Set.PLAYER_FILES = { "ff1.sav", SETTINGS, "rom.nes" }
 
 function Set.read_file(path)
     local f = io.open(path, "rb")
@@ -31,16 +33,36 @@ local read_file, write_file = Set.read_file, Set.write_file
 
 function Set.pick_data_dir(dev)
     local saves = love.filesystem.getSaveDirectory()
-    if dev then Set.data_dir = saves; return end
+    Set.data_dir = saves
+    -- (LOVE makes its save folder on its first write; io can't)
+    if love.filesystem.write(".created", "") then love.filesystem.remove(".created") end
+    if dev then return end
     local base = love.filesystem.getSourceBaseDirectory()
-    if not write_file(base .. "/.write-test", "") then Set.data_dir = saves; return end
-    os.remove(base .. "/.write-test")
-    -- (from an earlier release that kept them in the save folder)
-    for _, name in ipairs({ "ff1.sav", SETTINGS, "rom.nes" }) do
-        local old = read_file(saves .. "/" .. name)
-        if old and not read_file(base .. "/" .. name) then write_file(base .. "/" .. name, old) end
+    if read_file(base .. "/portable.txt") and write_file(base .. "/.write-test", "") then
+        os.remove(base .. "/.write-test")
+        Set.data_dir = base                        -- (portable)
+        return
     end
-    Set.data_dir = base
+    -- An earlier release kept them beside the program: each one that's newer
+    -- than the save folder's copy (or the only one) comes here, the copy it
+    -- replaces kept as NAME.bak.  (The dates: the program's folder mounted
+    -- as "base"; without it, only missing files come.)
+    local mounted = love.filesystem.mount(base, "base")
+    for _, name in ipairs(Set.PLAYER_FILES) do
+        local there = read_file(base .. "/" .. name)
+        if there then
+            local here = read_file(saves .. "/" .. name)
+            local t_there = mounted and love.filesystem.getInfo("base/" .. name)
+            local t_here = love.filesystem.getInfo(name)
+            local newer = here == nil or (t_there and t_here and here ~= there and
+                                          (t_there.modtime or 0) > (t_here.modtime or 0))
+            if newer then
+                if here then write_file(saves .. "/" .. name .. ".bak", here) end
+                write_file(saves .. "/" .. name, there)
+            end
+        end
+    end
+    if mounted then love.filesystem.unmount(base) end
 end
 
 function Set.save()

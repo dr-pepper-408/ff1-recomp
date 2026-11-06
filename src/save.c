@@ -45,18 +45,31 @@ int Save_WriteFile(const char* path, const SaveData* unsram, const SaveData* sra
     /* Keep whatever else the file holds ($6800-$7FFF is unused by the game,
      * but an emulator's file may have it). */
     memset(file, 0, sizeof(file));
+    size_t had = 0;
     FILE* f = fopen(path, "rb");
     if (f) {
-        size_t n = fread(file, 1, sizeof(file), f);
-        (void)n;
+        had = fread(file, 1, sizeof(file), f);
         fclose(f);
+    }
+    /* (not in the original: the previous save is kept as PATH.bak, and the
+     * new one is written beside it, then put in its place, so a failed
+     * write can't lose both) */
+    char bak[1024], tmp[1024];
+    snprintf(bak, sizeof(bak), "%s.bak", path);
+    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
+    if (had) {
+        FILE* b = fopen(bak, "wb");
+        if (b) { fwrite(file, 1, had, b); fclose(b); }
     }
     memcpy(file, unsram, sizeof(SaveData));
     memcpy(file + SAVE_SRAM_OFS, sram, sizeof(SaveData));
-    f = fopen(path, "wb");
+    f = fopen(tmp, "wb");
     if (!f) return 0;
     int ok = fwrite(file, 1, sizeof(file), f) == sizeof(file);
-    return (fclose(f) == 0) && ok;
+    ok = (fclose(f) == 0) && ok;
+    if (!ok) { remove(tmp); return 0; }
+    remove(path);                      /* (rename won't replace a file on Windows) */
+    return rename(tmp, path) == 0;
 }
 
 int Save_ReadFile(const char* path, SaveData* out) {
