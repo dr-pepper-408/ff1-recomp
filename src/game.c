@@ -360,10 +360,14 @@ static int s_random_encounters = 1;
 void Game_SetRandomEncounters(int on) { s_random_encounters = on != 0; }
 
 /* For the battle speedup (an option, not in the original): frames that
- * don't step the music, so it keeps its pace. */
+ * don't step the music or the battle's sound effects, so both keep their
+ * pace. */
 static int s_music_hold = 0;
 
-void Game_SetMusicHold(int on) { s_music_hold = on != 0; }
+void Game_SetMusicHold(int on) {
+    s_music_hold = on != 0;
+    Sfx_SetBattleHold(on);
+}
 
 static int ow_can_move(GameContext* g, int x, int y) {
     uint8_t v = g->player.vehicle;

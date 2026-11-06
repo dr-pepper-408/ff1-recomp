@@ -152,7 +152,8 @@ void Game_SetSavePath(const char* path);
 void Game_SetRandomEncounters(int on);
 
 /** For a speedup (an option, not in the original): while on, frames don't
- *  step the music (MusicPlay), so running extra frames keeps its pace. */
+ *  step the music (MusicPlay) or the battle's sound effect, so running extra
+ *  frames keeps their pace. */
 void Game_SetMusicHold(int on);
 
 /** SaveGame: save to the SRAM file now.  @return 1 on success. */

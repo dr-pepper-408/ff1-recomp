@@ -29,6 +29,7 @@
 #include "save.h"
 #include "story.h"
 #include "music.h"
+#include "sfx.h"
 #include "minigame.h"
 #include "party.h"
 #include "rng.h"
@@ -466,6 +467,19 @@ int main(int argc, char** argv) {
         uint32_t fast = Music_Frames() - m0;
         printf("%s: battle speedup: the music %u frames in 3 held frames, %u in 60 frames shown at 4x\n",
                held == 0 && fast == 60 ? "PASS" : "FAIL", (unsigned)held, (unsigned)fast);
+        /* A sound effect (an enemy's hit) lasts as many frames shown at 4x
+         * as at 1x. */
+        int len[2] = { 0, 0 };
+        for (int k = 0; k < 2; k++) {
+            Sfx_BattlePlay(1);
+            while (Sfx_BattleFramesLeft() > 0 && len[k] < 600) {
+                if (k) { Game_SetMusicHold(1); step(&none, 3); Game_SetMusicHold(0); }
+                step(&none, 1);
+                len[k]++;
+            }
+        }
+        printf("%s: battle speedup: a sound effect lasts %d frames shown at 1x, %d at 4x\n",
+               len[0] > 1 && len[0] == len[1] ? "PASS" : "FAIL", len[0], len[1]);
         const InputState run = { BTN_A, BTN_A, 0 };
         for (int f = 0; g_ctx.state == GS_BATTLE && f < 30000; f++) step((f % 8) == 0 ? &run : &none, 1);
         settle();

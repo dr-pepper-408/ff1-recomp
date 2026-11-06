@@ -168,8 +168,16 @@ void Sfx_BattlePlay(int id) {
     Apu_Write(0x4015, 0x0F);
 }
 
+/* For the battle speedup (an option, not in the original): its extra
+ * frames don't step the effect, so it plays at its own length. */
+static int s_battle_hold;
+
+void Sfx_SetBattleHold(int on) { s_battle_hold = on != 0; }
+
+int Sfx_BattleFramesLeft(void) { return bsfx_ctr; }
+
 void Sfx_BattleUpdate(void) {
-    if (!bsfx_ctr) return;
+    if (!bsfx_ctr || s_battle_hold) return;
     battle_sfx_square();
     battle_sfx_noise();
     bsfx_ctr--;

@@ -49,6 +49,13 @@ void Sfx_BattlePlay(int id);
 /** UpdateBattleSFX: a frame of the battle sound effect (BattleUpdateAudio). */
 void Sfx_BattleUpdate(void);
 
+/** For the battle speedup (an option, not in the original): while on,
+ *  Sfx_BattleUpdate doesn't step the effect (Game_SetMusicHold sets it). */
+void Sfx_SetBattleHold(int on);
+
+/** Frames left of the battle sound effect (0: none playing), for tests. */
+int Sfx_BattleFramesLeft(void);
+
 /** ChaosDeath_FadeNoise: the rumble one step quieter ($9C - 1 to $400C). */
 void Sfx_ChaosRumble(void);
 void Sfx_ChaosRumbleStart(void); ///< ChaosDeath: $4015 = 8 and the rumble at full volume
