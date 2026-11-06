@@ -38,6 +38,7 @@ static uint8_t prev_held;
 static int16_t audio_buf[2048];
 static int audio_n;
 static double frame_samples;
+static int sound_hold;          /* (ff1_set_music_hold: the speedup's extra frames) */
 
 FF1_API int ff1_load_rom(const char* path) {
     return (int)RomData_Open(path);
@@ -69,6 +70,11 @@ FF1_API void ff1_frame(int buttons) {
     InputState in = { held, (uint8_t)(changed & held), (uint8_t)(changed & ~held) };
     prev_held = held;
     Game_Update(&g_ctx, &in);
+
+    /* (the speedup's extra frames make no sound: the APU's own clock --
+     * notes' lengths, envelopes, the waves' phase -- runs only for the
+     * samples heard, so the music keeps its sound as well as its pace) */
+    if (sound_hold) { audio_n = 0; return; }
 
     /* Audio_Frame: a frame's worth of samples, the fraction carried over */
     frame_samples += SAMPLE_RATE * (NES_FRAME_NS / 1e9);
@@ -235,6 +241,7 @@ FF1_API void ff1_set_encounters(int on) {
 /* The battle speedup's extra frames: while on, the music isn't stepped. */
 FF1_API void ff1_set_music_hold(int on) {
     Game_SetMusicHold(on);
+    sound_hold = on != 0;
 }
 
 /* Battles' EXP and gold times `mult` (an option, not in the original; 1 is). */

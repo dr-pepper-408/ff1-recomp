@@ -180,8 +180,9 @@ FF1_API int ff1_tour_go(int i, int* info);
 /** Random encounters on (as the original) or off; fixed battles still happen. */
 FF1_API void ff1_set_encounters(int on);
 
-/** For a speedup: while `on`, frames don't step the music, so extra frames
- *  run between two normal ones keep its pace. */
+/** For a speedup: while `on`, frames don't step the music and make no
+ *  sound (the APU's clock stands still), so extra frames run between two
+ *  normal ones leave the music's pace and sound as they were. */
 FF1_API void ff1_set_music_hold(int on);
 
 /** Battles' EXP and gold rewards times `mult` (1, as the original; an option). */
