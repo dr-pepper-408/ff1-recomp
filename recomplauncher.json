@@ -1,0 +1,33 @@
+{
+    "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
+    "format": 1,
+    "name": "FF1 Recomp",
+    "repo": "dr-pepper-408/ff1-recomp",
+    "game": {
+        "kind": "iso",
+        "label": "Your Final Fantasy (USA) NES ROM: the original 1990 North American release, unmodified. The file's 16-byte header may be iNES, NES 2.0 or missing."
+    },
+    "start": {
+        "program": [
+            "FF1-recomp.exe"
+        ],
+        "args": [
+            "--drop={game}"
+        ]
+    },
+    "folders": {
+        "saves": [
+            {
+                "path": "{config}/ff1-recomp"
+            }
+        ]
+    },
+    "saves": [
+        "{config}/ff1-recomp/ff1.sav",
+        "{config}/ff1-recomp/ff1.sav.bak",
+        "{config}/ff1-recomp/settings.txt"
+    ],
+    "requires": [
+        "start"
+    ]
+}
