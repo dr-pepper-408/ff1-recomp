@@ -1,5 +1,7 @@
 # FF1-recomp
 
+<a href="https://recomplauncher.com/game/ff1-recomp"><picture><source media="(prefers-color-scheme: dark)" srcset="https://recomplauncher.com/assets/press/launcher/badge-light.svg"><img alt="Get it on RecompLauncher" src="https://recomplauncher.com/assets/press/launcher/badge-dark.svg" height="48"></picture></a>
+
 A native port of *Final Fantasy* (NES, 1990) to C99, written routine by
 routine from a disassembly of the original game rather than by emulating
 the 6502. The game logic follows the original's, including its bugs (marked

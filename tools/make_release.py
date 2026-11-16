@@ -135,6 +135,7 @@ def build(args, dll, love_exe, out):
             shutil.copy(os.path.join(args.love, name), out)
     shutil.copy(os.path.join(args.love, "license.txt"), os.path.join(out, "LOVE-license.txt"))
     shutil.copy(dll, out)
+    shutil.copy(os.path.join(PORT, "recomplauncher.json"), out)
     open(os.path.join(out, "README.txt"), "w", encoding="utf-8", newline="\r\n").write(PLAYER_README)
 
     # (the game keeps the player's ROM and save beside the program: never ship them)
